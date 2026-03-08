@@ -43,3 +43,9 @@ Os dados serão obtidos por raspagem dos sites dos supermercados, sob demanda, c
 - Cadastro de produtos favoritos
 - Monitoramento de promoções de produtos selecionados
 - Notificações quando itens favoritados entrarem em promoção
+
+# Estrutura
+.
+├── client			# frontend
+├── README.md
+└── server			# backend
