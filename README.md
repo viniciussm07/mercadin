@@ -45,7 +45,10 @@ Os dados serão obtidos por raspagem dos sites dos supermercados, sob demanda, c
 - Notificações quando itens favoritados entrarem em promoção
 
 # Estrutura
-.
-├── client			# frontend
-├── README.md
-└── server			# backend
+
+```
+mercadin/
+├── client/    # frontend
+├── server/    # backend
+└── README.md
+```
