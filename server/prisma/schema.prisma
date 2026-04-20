@@ -1,8 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,10 +9,123 @@ datasource db {
   provider = "postgresql"
 }
 
+// -----------------------------------------------------------------------------
+// Usuários e Autenticação
+// -----------------------------------------------------------------------------
 model User {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String    @id // UUID vindo do provedor de identidade (ex: Supabase Auth / Firebase)
+  email          String    @unique
+  name           String?
+  avatarUrl      String?
+  expoPushToken  String?   // Token para envio de notificações push via Expo
+  
+  lists          ShoppingList[]
+  favorites      FavoriteProduct[]
+  
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+// -----------------------------------------------------------------------------
+// Supermercados
+// -----------------------------------------------------------------------------
+model Market {
+  id        String    @id @default(uuid())
+  name      String    @unique // Ex: "Savegnago", "Tenda Atacado", "Jaú Serve"
+  url       String?   // URL base do supermercado
+  
+  products  MarketProduct[]
+}
+
+// -----------------------------------------------------------------------------
+// Catálogo de Produtos
+// -----------------------------------------------------------------------------
+
+// Produto Universal (Unificado por Código de Barras / EAN)
+model MasterProduct {
+  id          String    @id @default(uuid())
+  ean         String    @unique // Código global do produto. Fonte de verdade.
+  name        String    // Nome genérico do produto (ex: "Arroz Branco Tio João 5kg")
+  imageUrl    String?   // Imagem de referência universal
+  brand       String?   // Marca extraída (ex: "Tio João")
+  
+  favorites   FavoriteProduct[]
+  variants    MarketProduct[]
+  
+  createdAt   DateTime  @default(now())
+}
+
+// O produto específico dentro de um mercado (SKU)
+model MarketProduct {
+  id               String    @id @default(uuid())
+  sku              String    // ID/Código interno usado no site do mercado
+  nameInMarket     String    // Nome exato retornado pelo mercado (pode conter abreviações)
+  currentPrice     Float     // Preço mais recente capturado
+  url              String?   // Link direto para a página do produto no mercado
+  
+  isAvailable      Boolean   @default(true)  // Controle de ruptura de estoque (Soft Delete)
+  lastScrapedAt    DateTime  @default(now()) // Timestamp para detectar preços/dados defasados
+  
+  marketId         String
+  masterProductId  String
+  
+  market           Market         @relation(fields: [marketId], references: [id])
+  masterProduct    MasterProduct  @relation(fields: [masterProductId], references: [id])
+  history          PriceHistory[]
+  listItems        ShoppingListItem[]
+
+  @@unique([marketId, sku]) // Um mercado não pode ter o mesmo SKU duplicado
+}
+
+// Registro histórico de cada variação de preço detectada (Time-Series)
+model PriceHistory {
+  id               String    @id @default(uuid())
+  price            Float
+  timestamp        DateTime  @default(now())
+  
+  marketProductId  String
+  marketProduct    MarketProduct @relation(fields: [marketProductId], references: [id])
+}
+
+// -----------------------------------------------------------------------------
+// Funcionalidades do Usuário (Listas e Favoritos)
+// -----------------------------------------------------------------------------
+
+// Listas de Compras
+model ShoppingList {
+  id        String    @id @default(uuid())
+  name      String    // Ex: "Compra do Mês", "Churrasco"
+  
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  
+  items     ShoppingListItem[]
+  
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+// Item específico de uma lista de compras
+model ShoppingListItem {
+  id              String    @id @default(uuid())
+  quantity        Int       @default(1) // Quantidade desejada pelo usuário
+  
+  listId          String
+  marketProductId String
+  
+  list            ShoppingList  @relation(fields: [listId], references: [id], onDelete: Cascade)
+  marketProduct   MarketProduct @relation(fields: [marketProductId], references: [id])
+}
+
+// Produtos Favoritados para Monitoramento de Preço
+model FavoriteProduct {
+  userId           String
+  masterProductId  String
+  
+  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  masterProduct    MasterProduct @relation(fields: [masterProductId], references: [id], onDelete: Cascade)
+
+  createdAt        DateTime      @default(now())
+
+  @@id([userId, masterProductId]) // Um usuário só pode favoritar o mesmo EAN uma vez
 }
