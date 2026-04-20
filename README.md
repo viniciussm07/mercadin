@@ -43,3 +43,12 @@ Os dados serão obtidos por raspagem dos sites dos supermercados, sob demanda, c
 - Cadastro de produtos favoritos
 - Monitoramento de promoções de produtos selecionados
 - Notificações quando itens favoritados entrarem em promoção
+
+# Estrutura
+
+```
+mercadin/
+├── client/    # frontend
+├── server/    # backend
+└── README.md
+```

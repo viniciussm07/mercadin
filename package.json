@@ -1,0 +1,38 @@
+{
+  "name": "@mercadin/core",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev:server": "pnpm --filter @mercadin/server start:dev",
+    "dev:client": "pnpm --filter @mercadin/client start",
+    "dev:client:ios": "pnpm --filter @mercadin/client ios",
+    "dev:client:android": "pnpm --filter @mercadin/client android",
+    "dev:client:web": "pnpm --filter @mercadin/client web",
+    "build:client": "pnpm --filter @mercadin/client build",
+    "build:server": "pnpm --filter @mercadin/server build",
+    "build": "pnpm run build:server && pnpm run build:client",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.31.0",
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@typescript-eslint/eslint-plugin": "^8.56.1",
+    "@typescript-eslint/parser": "^8.56.1",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-native": "^5.0.0",
+    "globals": "^17.4.0",
+    "prettier": "^3.8.1",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.56.1"
+  }
+}
