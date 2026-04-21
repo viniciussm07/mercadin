@@ -13,6 +13,7 @@
     "build:client": "pnpm --filter @mercadin/client build",
     "build:server": "pnpm --filter @mercadin/server build",
     "build": "pnpm run build:server && pnpm run build:client",
+    "build:tsc": "pnpm run --filter @mercadin/server build:tsc && pnpm run --filter @mercadin/client build:tsc",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write ."
