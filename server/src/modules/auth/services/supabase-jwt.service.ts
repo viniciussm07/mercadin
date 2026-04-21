@@ -28,7 +28,6 @@ export class SupabaseJwtService {
       const payload = jwt.verify(token, this.secret, {
         algorithms: ["HS256"],
       });
-      console.log({ payload });
       if (typeof payload === "string" || !payload.sub) {
         throw new UnauthorizedException("Invalid token payload");
       }
