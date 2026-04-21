@@ -13,7 +13,7 @@ export class ShoppingListsService {
   }
 
   async findOne(id: string, userId: string) {
-    const list = await this.repo.findByIdForUser(id, userId);
+    const list = await this.repo.findByIdForUser(id, userId, { select: { id: true } });
     if (!list) throw new NotFoundException("List not found");
     return list;
   }
@@ -43,7 +43,7 @@ export class ShoppingListsService {
   }
 
   private async assertOwnership(listId: string, userId: string) {
-    const list = await this.repo.findByIdForUser(listId, userId);
+    const list = await this.repo.findByIdForUser(listId, userId, { select: { id: true } });
     if (!list) throw new ForbiddenException("List not accessible");
   }
 }

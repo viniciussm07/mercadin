@@ -2,16 +2,14 @@ import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from
 import { Reflector } from "@nestjs/core";
 import type { Request } from "express";
 import { IS_PUBLIC_KEY } from "@/common/decorators/public.decorator";
-import { AuthService } from "../services/auth.service";
-import { AuthSyncService } from "../services/auth-sync.service";
+import { SupabaseJwtService } from "../services/supabase-jwt.service";
 import type { AuthenticatedUser } from "@/common/decorators/current-user.decorator";
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
-    private readonly authService: AuthService,
-    private readonly sync: AuthSyncService,
+    private readonly jwt: SupabaseJwtService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -28,8 +26,14 @@ export class JwtAuthGuard implements CanActivate {
       throw new UnauthorizedException("Missing bearer token");
     }
     const token = header.slice("Bearer ".length).trim();
-    const user = await this.authService.verifyToken(token);
-    request.user = await this.sync.ensureUser(user);
+
+    const claims = await this.jwt.verify(token);
+
+    if (!claims.email) {
+      throw new UnauthorizedException("Token missing email claim");
+    }
+
+    request.user = { id: claims.sub, email: claims.email };
     return true;
   }
 }

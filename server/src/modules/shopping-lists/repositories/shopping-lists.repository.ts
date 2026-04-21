@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "@/database/prisma.service";
+import { Prisma } from "@prisma/client";
 
 @Injectable()
 export class ShoppingListsRepository {
@@ -13,16 +14,10 @@ export class ShoppingListsRepository {
     });
   }
 
-  findByIdForUser(id: string, userId: string) {
+  findByIdForUser(id: string, userId: string, options?: Prisma.ShoppingListFindFirstArgs) {
     return this.prisma.shoppingList.findFirst({
       where: { id, userId },
-      include: {
-        items: {
-          include: {
-            marketProduct: { include: { market: true, masterProduct: true } },
-          },
-        },
-      },
+      ...options,
     });
   }
 

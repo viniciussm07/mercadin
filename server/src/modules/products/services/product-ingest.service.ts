@@ -42,7 +42,7 @@ export class ProductIngestService {
 
           const priceChanged = !existing || existing.currentPrice !== product.price;
 
-          await tx.marketProduct.upsert({
+          const updatedProduct = await tx.marketProduct.upsert({
             where: { marketId_sku: { marketId: market.id, sku: product.sku } },
             create: {
               sku: product.sku,
@@ -65,12 +65,8 @@ export class ProductIngestService {
           });
 
           if (priceChanged) {
-            const mp = await tx.marketProduct.findUniqueOrThrow({
-              where: { marketId_sku: { marketId: market.id, sku: product.sku } },
-              select: { id: true },
-            });
             await tx.priceHistory.create({
-              data: { marketProductId: mp.id, price: product.price },
+              data: { marketProductId: updatedProduct.id, price: product.price },
             });
           }
         });

@@ -63,12 +63,4 @@ export class AuthService {
 
     return data;
   }
-
-  async verifyToken(token: string) {
-    const { data, error } = await this.supabase.auth.getUser(token);
-    if (error || !data.user) {
-      throw new UnauthorizedException("Invalid or expired token");
-    }
-    return data.user;
-  }
 }

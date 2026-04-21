@@ -1,6 +1,7 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import jwt from "jsonwebtoken";
+import jwksClient from "jwks-rsa";
 
 export interface SupabaseJwtClaims {
   sub: string;
@@ -13,29 +14,41 @@ export interface SupabaseJwtClaims {
 
 @Injectable()
 export class SupabaseJwtService {
-  private readonly secret: string;
+  private readonly jwks: jwksClient.JwksClient;
 
   constructor(config: ConfigService) {
-    const secret = config.get<string>("SUPABASE_JWT_SECRET");
-    if (!secret) {
-      throw new Error("SUPABASE_JWT_SECRET is not configured");
+    const supabaseUrl = config.get<string>("SUPABASE_URL");
+    const anonKey = config.get<string>("SUPABASE_ANON_KEY");
+    if (!supabaseUrl || !anonKey) {
+      throw new Error("SUPABASE_URL and SUPABASE_ANON_KEY must be configured");
     }
-    this.secret = secret;
+    this.jwks = jwksClient({
+      jwksUri: `${supabaseUrl}/auth/v1/.well-known/jwks.json`,
+      requestHeaders: { apikey: anonKey },
+      cache: true,
+      rateLimit: true,
+    });
   }
 
-  verify(token: string): SupabaseJwtClaims {
-    try {
-      const payload = jwt.verify(token, this.secret, {
-        algorithms: ["HS256"],
-      });
-      console.log({ payload });
-      if (typeof payload === "string" || !payload.sub) {
-        throw new UnauthorizedException("Invalid token payload");
-      }
-      return payload as SupabaseJwtClaims;
-    } catch (err) {
-      if (err instanceof UnauthorizedException) throw err;
-      throw new UnauthorizedException("Invalid or expired token");
+  private getKey: jwt.GetPublicKeyOrSecret = (header, callback) => {
+    if (!header.kid) {
+      callback(new Error("No kid in token header"));
+      return;
     }
+    this.jwks.getSigningKey(header.kid, (err, key) => {
+      callback(err ?? null, key?.getPublicKey());
+    });
+  };
+
+  async verify(token: string): Promise<SupabaseJwtClaims> {
+    return new Promise((resolve, reject) => {
+      jwt.verify(token, this.getKey, { algorithms: ["ES256"] }, (err, payload) => {
+        if (err || typeof payload === "string" || !payload?.sub) {
+          reject(new UnauthorizedException("Invalid or expired token"));
+          return;
+        }
+        resolve(payload as SupabaseJwtClaims);
+      });
+    });
   }
 }

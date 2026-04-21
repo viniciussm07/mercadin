@@ -45,7 +45,7 @@ export class PriceCombinationService {
   constructor(private readonly repo: ShoppingListsRepository) {}
 
   async combine(listId: string, userId: string) {
-    const list = await this.repo.findByIdForUser(listId, userId);
+    const list = await this.repo.findByIdForUser(listId, userId, { select: { id: true } });
     if (!list) throw new NotFoundException("List not found");
 
     const rawItems = await this.repo.findItemsWithVariants(listId);
