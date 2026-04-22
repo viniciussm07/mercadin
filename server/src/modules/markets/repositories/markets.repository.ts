@@ -13,10 +13,14 @@ export class MarketsRepository {
     return this.prisma.market.findUnique({ where: { name } });
   }
 
-  upsertByName(data: { name: string; url?: string }) {
+  findBySlug(slug: string) {
+    return this.prisma.market.findUnique({ where: { slug } });
+  }
+
+  upsertBySlug(data: { name: string; url: string; slug: string }) {
     return this.prisma.market.upsert({
-      where: { name: data.name },
-      create: { name: data.name, url: data.url },
+      where: { slug: data.slug },
+      create: { name: data.name, url: data.url, slug: data.slug },
       update: { url: data.url },
     });
   }
