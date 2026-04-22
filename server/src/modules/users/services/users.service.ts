@@ -1,16 +1,18 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { UsersRepository } from "../repositories/users.repository";
-import { CreateUserDto } from "../dtos/create-user.dto";
+import { UpdateProfileDto } from "../dtos/update-profile.dto";
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly usersRepository: UsersRepository) {}
+  constructor(private readonly users: UsersRepository) {}
 
-  findAll() {
-    return this.usersRepository.findAll();
+  async findMe(id: string) {
+    const user = await this.users.findById(id);
+    if (!user) throw new NotFoundException("User not found");
+    return user;
   }
 
-  create(dto: CreateUserDto) {
-    return this.usersRepository.create(dto);
+  updateProfile(id: string, dto: UpdateProfileDto) {
+    return this.users.updateProfile(id, dto);
   }
 }
