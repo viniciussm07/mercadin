@@ -1,28 +1,25 @@
 import React from "react";
 import { Text, View, TextInput, TouchableOpacity, ScrollView, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { Navbar } from "@components/nav-bar";
 import { useNavigation } from "@react-navigation/native";
-import { Navbar } from "../../components/nav-bar";
 
-export const Home = () => {
+export const Login = () => {
   const navigation = useNavigation<any>();
 
   return (
     <View className="flex-1 bg-[#F8F5F0]">
-      <Navbar activePage="signup" />
+      <Navbar activePage="login" />
 
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} className="flex-1">
         <View className="flex-1 items-center justify-center px-6 py-10">
           <View className="w-full max-w-md bg-white p-10 rounded-[40px] shadow-sm border border-zinc-100">
             <View className="flex-row items-start mb-8">
-              <TouchableOpacity
-                onPress={() => navigation.goBack()}
-                className="mr-4 mt-1 border border-zinc-200 rounded-full p-2"
-              >
+              <TouchableOpacity className="mr-4 mt-1 border border-zinc-200 rounded-full p-2">
                 <Ionicons name="arrow-back" size={20} color="black" />
               </TouchableOpacity>
               <View className="flex-1">
-                <Text className="text-3xl font-bold text-zinc-900">Crie sua conta</Text>
+                <Text className="text-3xl font-bold text-zinc-900">Faça login</Text>
                 <Text className="text-zinc-400 text-sm">
                   Utilize e-mail e senha ou uma conta do Google.
                 </Text>
@@ -30,14 +27,6 @@ export const Home = () => {
             </View>
 
             <View className="gap-y-5">
-              <View>
-                <Text className="text-zinc-700 font-semibold mb-1.5 ml-1">Nome completo</Text>
-                <TextInput
-                  placeholder="Seu nome completo"
-                  className="w-full border border-zinc-200 rounded-2xl px-4 text-base h-12 text-zinc-600"
-                />
-              </View>
-
               <View>
                 <Text className="text-zinc-700 font-semibold mb-1.5 ml-1">E-mail</Text>
                 <TextInput
@@ -51,7 +40,7 @@ export const Home = () => {
               <View>
                 <Text className="text-zinc-700 font-semibold mb-1.5 ml-1">Senha</Text>
                 <TextInput
-                  placeholder="********"
+                  placeholder="***********"
                   secureTextEntry
                   className="w-full border border-zinc-200 rounded-2xl px-4 text-base h-12 text-zinc-600"
                 />
@@ -73,13 +62,13 @@ export const Home = () => {
             <View className="flex-row items-center justify-between gap-4">
               <TouchableOpacity
                 className="flex-1 border border-zinc-100 rounded-full py-4 items-center"
-                onPress={() => navigation.navigate("Login")}
+                onPress={() => navigation.navigate("Home")}
               >
-                <Text className="text-orange-600 font-bold">Já tenho conta</Text>
+                <Text className="text-orange-600 font-bold">Criar conta</Text>
               </TouchableOpacity>
 
               <TouchableOpacity className="flex-1 bg-orange-600 rounded-full py-4 items-center shadow-lg shadow-orange-200">
-                <Text className="text-white font-bold">Criar conta</Text>
+                <Text className="text-white font-bold">Entrar</Text>
               </TouchableOpacity>
             </View>
           </View>
