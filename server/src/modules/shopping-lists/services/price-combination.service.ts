@@ -40,6 +40,14 @@ export interface SuperCartPick {
   marketName: string;
 }
 
+export interface SuperCart {
+  total: number;
+  marketsCount: number;
+  isComplete: boolean;
+  picks: SuperCartPick[];
+  missing: string[];
+}
+
 @Injectable()
 export class PriceCombinationService {
   constructor(private readonly repo: ShoppingListsRepository) {}
@@ -60,9 +68,10 @@ export class PriceCombinationService {
       undefined,
     );
 
-    const savings = cheapestSingleMarket
-      ? Number((cheapestSingleMarket.total - superCart.total).toFixed(2))
-      : null;
+    const savings =
+      cheapestSingleMarket && superCart.isComplete
+        ? Number((cheapestSingleMarket.total - superCart.total).toFixed(2))
+        : null;
 
     return {
       listId,
@@ -142,7 +151,7 @@ export class PriceCombinationService {
     });
   }
 
-  private buildSuperCart(items: AggregatedItem[]) {
+  private buildSuperCart(items: AggregatedItem[]): SuperCart {
     const picks: SuperCartPick[] = [];
     const missing: string[] = [];
     let total = 0;
@@ -171,6 +180,7 @@ export class PriceCombinationService {
     return {
       total: Number(total.toFixed(2)),
       marketsCount: marketsUsed.size,
+      isComplete: missing.length === 0,
       picks,
       missing,
     };
