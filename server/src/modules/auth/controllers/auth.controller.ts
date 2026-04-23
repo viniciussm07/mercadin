@@ -3,6 +3,7 @@ import { AuthService } from "../services/auth.service";
 import { SignUpDto } from "../dtos/sign-up.dto";
 import { SignInDto } from "../dtos/sign-in.dto";
 import { Public } from "@/common/decorators/public.decorator";
+import { SignInWithToken } from "../dtos/sign-in-with-token.dto";
 
 @Controller("auth")
 export class AuthController {
@@ -18,5 +19,11 @@ export class AuthController {
   @Post("sign-in")
   async signIn(@Body() dto: SignInDto) {
     return this.authService.signIn(dto);
+  }
+
+  @Public()
+  @Post("sign-in-with-token")
+  async signInWithToken(@Body() dto: SignInWithToken) {
+    return this.authService.signInWithToken(dto);
   }
 }

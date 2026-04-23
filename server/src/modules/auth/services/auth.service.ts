@@ -4,6 +4,7 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { SignUpDto } from "../dtos/sign-up.dto";
 import { SignInDto } from "../dtos/sign-in.dto";
 import { PrismaService } from "@/database/prisma.service";
+import { SignInWithToken } from "../dtos/sign-in-with-token.dto";
 
 @Injectable()
 export class AuthService {
@@ -55,6 +56,19 @@ export class AuthService {
     const { data, error } = await this.supabase.auth.signInWithPassword({
       email: dto.email,
       password: dto.password,
+    });
+
+    if (error) {
+      throw new UnauthorizedException(error.message);
+    }
+
+    return data;
+  }
+
+  async signInWithToken(dto: SignInWithToken) {
+    const { data, error } = await this.supabase.auth.signInWithIdToken({
+      provider: dto.provider,
+      token: dto.token,
     });
 
     if (error) {
