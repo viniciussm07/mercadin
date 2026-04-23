@@ -1,9 +1,11 @@
 export enum RouteNames {
   HOME = "Home",
   LOGIN = "Login",
+  SIGNUP = "Signup",
 }
 
-export const RoutePaths: Record<RouteNames, string> = {
-  [RouteNames.HOME]: "Home",
-  [RouteNames.LOGIN]: "Login",
+export type RootStackParamList = {
+  [RouteNames.HOME]: undefined;
+  [RouteNames.LOGIN]: undefined;
+  [RouteNames.SIGNUP]: undefined;
 };

@@ -1,18 +1,33 @@
 import "./global.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { Routes } from "./routes";
+import { SessionProvider } from "@contexts/session";
+import { PortalHost } from "@rn-primitives/portal";
 
 const queryClient = new QueryClient();
 
-export default function App() {
+export const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <SafeAreaProvider>
-        <Routes />
-        <StatusBar style="auto" />
-      </SafeAreaProvider>
+      <NavigationContainer
+        theme={{
+          ...DefaultTheme,
+          colors: { ...DefaultTheme.colors, background: "hsl(42.86, 30.43%, 95.49%)" },
+        }}
+      >
+        <SafeAreaProvider>
+          <SessionProvider>
+            <Routes />
+            <StatusBar style="light" />
+            <PortalHost />
+          </SessionProvider>
+        </SafeAreaProvider>
+      </NavigationContainer>
     </QueryClientProvider>
   );
-}
+};
+
+export default App;
