@@ -2,11 +2,11 @@ import * as Slot from "@rn-primitives/slot";
 import { cn } from "@utils/cn";
 import { cva, type VariantProps } from "class-variance-authority";
 import * as React from "react";
-import { Platform, Text as RNText, type Role, type TextStyle } from "react-native";
+import { Platform, Text as RNText, type Role } from "react-native";
 
 const textVariants = cva(
   cn(
-    "text-foreground text-base",
+    "text-foreground text-base font-fraunces",
     Platform.select({
       web: "select-text",
     }),
@@ -34,6 +34,10 @@ const textVariants = cva(
         large: "text-lg font-semibold",
         small: "text-sm font-medium leading-none",
         muted: "text-muted-foreground text-sm",
+      },
+      fontFamily: {
+        questrial: "font-questrial",
+        fraunces: "font-fraunces",
       },
     },
     defaultVariants: {
@@ -64,40 +68,11 @@ const ARIA_LEVEL: Partial<Record<TextVariant, string>> = {
 
 const TextClassContext = React.createContext<string | undefined>(undefined);
 
-const getFrauncesFontFamily = (className?: string) => {
-  if (!className || className.includes("font-mono")) {
-    return undefined;
-  }
-
-  const isItalic = className.includes("italic");
-
-  if (className.includes("font-black")) {
-    return isItalic ? "Fraunces_900Black_Italic" : "Fraunces_900Black";
-  }
-
-  if (className.includes("font-extrabold")) {
-    return isItalic ? "Fraunces_800ExtraBold_Italic" : "Fraunces_800ExtraBold";
-  }
-
-  if (className.includes("font-bold")) {
-    return isItalic ? "Fraunces_700Bold_Italic" : "Fraunces_700Bold";
-  }
-
-  if (className.includes("font-semibold")) {
-    return isItalic ? "Fraunces_600SemiBold_Italic" : "Fraunces_600SemiBold";
-  }
-
-  if (className.includes("font-medium")) {
-    return isItalic ? "Fraunces_500Medium_Italic" : "Fraunces_500Medium";
-  }
-
-  return isItalic ? "Fraunces_400Regular_Italic" : "Fraunces_400Regular";
-};
-
 function Text({
   className,
   asChild = false,
   variant = "default",
+  fontFamily,
   style: styleProp,
   ...props
 }: React.ComponentProps<typeof RNText> &
@@ -106,19 +81,14 @@ function Text({
   }) {
   const textClass = React.useContext(TextClassContext);
   const Component = asChild ? Slot.Text : RNText;
-  const mergedClassName = cn(textVariants({ variant }), textClass, className);
-  const fontFamily = getFrauncesFontFamily(mergedClassName);
-  const style = React.useMemo<TextStyle | undefined>(
-    () => (fontFamily ? { fontFamily } : undefined),
-    [fontFamily],
-  );
+  const mergedClassName = cn(textVariants({ variant, fontFamily }), textClass, className);
 
   return (
     <Component
       className={mergedClassName}
       role={variant ? ROLE[variant] : undefined}
       aria-level={variant ? ARIA_LEVEL[variant] : undefined}
-      style={[style, styleProp]}
+      style={styleProp}
       {...props}
     />
   );

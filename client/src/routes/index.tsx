@@ -1,21 +1,32 @@
+import { useSession } from "@contexts/session";
+import { RootRouteNames } from "./types";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { Home } from "../pages/home";
-import { RootStackParamList, RouteNames } from "./types";
-import { Login } from "@pages/login";
-import { MainLayout } from "@layout/main-layout";
-import { SignUp } from "@pages/signup";
+import { RootStackParamList } from "./types";
+import { Text } from "@components/text";
+import { UnauthenticatedRoutesTabs } from "./unauthenticated";
 
-const Stack = createNativeStackNavigator<RootStackParamList>();
+export const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export const Routes = () => {
+  const {
+    session: { isAuthenticated },
+    isLoadingSession,
+  } = useSession();
+
+  if (isLoadingSession) {
+    return null;
+  }
+
   return (
-    <Stack.Navigator
-      screenOptions={{ headerShown: false }}
-      layout={({ children }) => <MainLayout children={children} />}
-    >
-      <Stack.Screen name={RouteNames.HOME} component={Home} />
-      <Stack.Screen name={RouteNames.LOGIN} component={Login} />
-      <Stack.Screen name={RouteNames.SIGNUP} component={SignUp} />
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {isAuthenticated ? (
+        <Stack.Screen
+          component={() => <Text>Autenticado</Text>}
+          name={RootRouteNames.AUTHENTICATED}
+        />
+      ) : (
+        <Stack.Screen name={RootRouteNames.UNAUTHENTICATED} component={UnauthenticatedRoutesTabs} />
+      )}
     </Stack.Navigator>
   );
 };

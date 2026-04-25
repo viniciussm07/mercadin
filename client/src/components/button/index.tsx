@@ -5,7 +5,7 @@ import { Platform, Pressable } from "react-native";
 
 const buttonVariants = cva(
   cn(
-    "group shrink-0 flex-row items-center justify-center gap-2 rounded-3xl shadow-none",
+    "group shrink-0 flex-row items-center justify-center gap-2 rounded-full shadow-none",
     Platform.select({
       web: "focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive whitespace-nowrap outline-none transition-all focus-visible:ring-[3px] disabled:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
     }),
@@ -30,8 +30,8 @@ const buttonVariants = cva(
           }),
         ),
         secondary: cn(
-          "bg-secondary active:bg-secondary/80 shadow-sm shadow-black/5",
-          Platform.select({ web: "hover:bg-secondary/80" }),
+          "bg-white active:bg-accent shadow-sm shadow-black/5",
+          Platform.select({ web: "hover:bg-accent" }),
         ),
         ghost: cn(
           "active:bg-accent dark:active:bg-accent/50",
@@ -43,19 +43,25 @@ const buttonVariants = cva(
         default: cn("h-10 px-4 py-2 sm:h-9", Platform.select({ web: "has-[>svg]:px-3" })),
         sm: cn("h-9 gap-1.5 px-3 sm:h-8", Platform.select({ web: "has-[>svg]:px-2.5" })),
         lg: cn("h-11 px-6 sm:h-10", Platform.select({ web: "has-[>svg]:px-4" })),
+        xl: cn("h-14 px-2 sm:h-13", Platform.select({ web: "has-[>svg]:px-4" })),
         icon: "h-10 w-10 sm:h-9 sm:w-9",
+      },
+      rounded: {
+        none: "rounded-none",
+        default: "rounded-full",
       },
     },
     defaultVariants: {
       variant: "default",
       size: "default",
+      rounded: "default",
     },
   },
 );
 
 const buttonTextVariants = cva(
   cn(
-    "text-foreground text-sm font-medium",
+    "text-foreground font-medium",
     Platform.select({ web: "pointer-events-none transition-colors" }),
   ),
   {
@@ -79,6 +85,7 @@ const buttonTextVariants = cva(
         sm: "",
         lg: "",
         icon: "",
+        xl: "",
       },
     },
     defaultVariants: {
@@ -90,11 +97,15 @@ const buttonTextVariants = cva(
 
 type ButtonProps = React.ComponentProps<typeof Pressable> & VariantProps<typeof buttonVariants>;
 
-function Button({ className, variant, size, ...props }: ButtonProps) {
+function Button({ className, variant, size, rounded, ...props }: ButtonProps) {
   return (
     <TextClassContext.Provider value={buttonTextVariants({ variant, size })}>
       <Pressable
-        className={cn(props.disabled && "opacity-50", buttonVariants({ variant, size }), className)}
+        className={cn(
+          props.disabled && "opacity-50",
+          buttonVariants({ variant, size, rounded }),
+          className,
+        )}
         role="button"
         {...props}
       />

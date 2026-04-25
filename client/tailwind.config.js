@@ -43,7 +43,15 @@ module.exports = {
         },
       },
       fontFamily: {
-        fraunces: ["Fraunces_400Regular", "Fraunces", "serif"],
+        questrial: ["Questrial_400Regular", "Questrial", "sans-serif"],
+        fraunces: [
+          "Fraunces_400Regular",
+          "Fraunces_500Medium",
+          "Fraunces_600SemiBold",
+          "Fraunces_700Bold",
+          "Fraunces",
+          "serif",
+        ],
       },
       borderRadius: {
         lg: "var(--radius)",

@@ -1,9 +1,8 @@
 import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "@routes/types";
+import { RootNavigation } from "@routes/types";
 
-export const useMercadinNavigation = () => {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+export const useMercadinNavigation = <TNavigation extends object = RootNavigation>() => {
+  const navigation = useNavigation<TNavigation>();
 
   return navigation;
 };

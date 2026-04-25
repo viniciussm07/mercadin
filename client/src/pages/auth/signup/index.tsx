@@ -2,14 +2,14 @@ import React from "react";
 import { View, TouchableOpacity, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useMercadinNavigation } from "@hooks/use-navigation";
-import { RouteNames } from "@routes/types";
+import { UnauthenticatedNavigation, UnauthenticatedRouteNames } from "@routes/types";
 import { Card, CardContent, CardFooter, CardHeader } from "@components/card";
 import { Text } from "@components/text";
 import { Button } from "@components/button";
 import { Input } from "@components/input";
 
 export const SignUp = () => {
-  const navigation = useMercadinNavigation();
+  const navigation = useMercadinNavigation<UnauthenticatedNavigation>();
 
   return (
     <View className="flex-1 items-center justify-center px-6 py-10">
@@ -24,7 +24,7 @@ export const SignUp = () => {
 
           <View className="flex-1">
             <Text className="text-3xl font-bold text-zinc-900">Crie sua conta</Text>
-            <Text className="text-sm text-zinc-400">
+            <Text className="text-sm text-zinc-400 font-questrial">
               Utilize e-mail e senha ou uma conta do Google.
             </Text>
           </View>
@@ -64,7 +64,10 @@ export const SignUp = () => {
         </CardContent>
 
         <CardFooter className="flex-row items-center justify-between gap-4">
-          <Button onPress={() => navigation.replace(RouteNames.LOGIN)} variant="outline">
+          <Button
+            onPress={() => navigation.navigate(UnauthenticatedRouteNames.LOGIN)}
+            variant="outline"
+          >
             <Text>Já tenho conta</Text>
           </Button>
 
