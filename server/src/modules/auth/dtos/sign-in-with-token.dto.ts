@@ -1,12 +1,17 @@
 import { Provider } from "@supabase/supabase-js";
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsIn, IsNotEmpty, IsOptional, IsString } from "class-validator";
 
 export class SignInWithToken {
   @IsString()
   @IsNotEmpty()
+  @IsIn(["google"])
   provider!: Provider;
 
   @IsString()
   @IsNotEmpty()
   token!: string;
+
+  @IsString()
+  @IsOptional()
+  accessToken?: string;
 }

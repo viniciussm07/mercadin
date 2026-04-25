@@ -7,6 +7,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import { Platform } from "react-native";
 import { useQueryClient } from "@tanstack/react-query";
 import { getHttpErrorMessage, isUnauthorizedError, setApiAccessToken } from "@services/http";
 import { sessionTokenStorage } from "@services/session-storage";
@@ -14,6 +15,8 @@ import { SessionUser, usersService } from "@services/users";
 import { useGetMe } from "./hooks/get-me";
 import { SESSION_QUERY_KEY } from "./keys";
 import { authService, SignInPayload } from "@services/auth";
+import { googleAuthService } from "@services/google-auth";
+import { getSupabaseClient, isSupabaseConfigured } from "@services/supabase";
 
 interface SessionContextValue {
   session: {
@@ -21,6 +24,7 @@ interface SessionContextValue {
     token: string | null;
     isAuthenticated: boolean;
     signIn: (credentials: SignInPayload) => Promise<void>;
+    signInWithGoogle: () => Promise<void>;
     signOut: () => Promise<void>;
     refetchMe: () => Promise<SessionUser | undefined>;
   };
@@ -47,20 +51,6 @@ export const SessionProvider = ({ children }: PropsWithChildren) => {
   }, [queryClient]);
 
   useEffect(() => {
-    const hydrateSession = async () => {
-      try {
-        const storedToken = await sessionTokenStorage.getToken();
-        setApiAccessToken(storedToken);
-        setToken(storedToken);
-      } finally {
-        setIsHydratingToken(false);
-      }
-    };
-
-    void hydrateSession();
-  }, []);
-
-  useEffect(() => {
     if (me.data) {
       setUser(me.data);
     }
@@ -76,26 +66,23 @@ export const SessionProvider = ({ children }: PropsWithChildren) => {
     }
   }, [clearSession, me.error, token]);
 
-  const signIn = useCallback(
-    async (credentials: SignInPayload) => {
-      const response = await authService.signIn(credentials);
-      const nextToken = response.session?.access_token;
-
-      if (!nextToken) {
-        throw new Error("A autenticação foi concluída sem retornar um token válido.");
-      }
-
-      await sessionTokenStorage.setToken(nextToken);
+  const establishSession = useCallback(
+    async (nextToken: string, options?: { syncLocalUser?: boolean }) => {
       setApiAccessToken(nextToken);
-      setToken(nextToken);
 
       try {
+        if (options?.syncLocalUser) {
+          await authService.syncSession();
+        }
+
         const nextUser = await queryClient.fetchQuery({
           queryKey: [...SESSION_QUERY_KEY, nextToken],
           queryFn: usersService.me,
           retry: false,
         });
 
+        await sessionTokenStorage.setToken(nextToken);
+        setToken(nextToken);
         setUser(nextUser);
       } catch (error) {
         await clearSession();
@@ -105,7 +92,85 @@ export const SessionProvider = ({ children }: PropsWithChildren) => {
     [clearSession, queryClient],
   );
 
+  useEffect(() => {
+    const hydrateSession = async () => {
+      try {
+        const storedToken = await sessionTokenStorage.getToken();
+
+        if (storedToken) {
+          setApiAccessToken(storedToken);
+          setToken(storedToken);
+          return;
+        }
+
+        if (Platform.OS === "web" && isSupabaseConfigured()) {
+          const { data } = await getSupabaseClient().auth.getSession();
+          const nextToken = data.session?.access_token;
+
+          if (nextToken) {
+            await establishSession(nextToken, { syncLocalUser: true });
+          }
+        }
+      } catch {
+        await clearSession();
+      } finally {
+        setIsHydratingToken(false);
+      }
+    };
+
+    void hydrateSession();
+  }, [clearSession, establishSession]);
+
+  const signIn = useCallback(
+    async (credentials: SignInPayload) => {
+      const response = await authService.signIn(credentials);
+      const nextToken = response.session?.access_token;
+
+      if (!nextToken) {
+        throw new Error("A autenticação foi concluída sem retornar um token válido.");
+      }
+
+      await establishSession(nextToken);
+    },
+    [establishSession],
+  );
+
+  const signInWithGoogle = useCallback(async () => {
+    if (Platform.OS === "web") {
+      const redirectTo = window.location.origin;
+
+      const { error } = await getSupabaseClient().auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo },
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      return;
+    }
+
+    const tokens = await googleAuthService.signIn();
+    const response = await authService.signInWithToken({
+      provider: "google",
+      token: tokens.idToken,
+      accessToken: tokens.accessToken,
+    });
+    const nextToken = response.session?.access_token;
+
+    if (!nextToken) {
+      throw new Error("A autenticação com Google foi concluída sem retornar um token válido.");
+    }
+
+    await establishSession(nextToken);
+  }, [establishSession]);
+
   const signOut = useCallback(async () => {
+    if (Platform.OS === "web" && isSupabaseConfigured()) {
+      await getSupabaseClient().auth.signOut();
+    }
+
     await clearSession();
   }, [clearSession]);
 
@@ -125,8 +190,16 @@ export const SessionProvider = ({ children }: PropsWithChildren) => {
   }, [queryClient, token]);
 
   const session = useMemo(
-    () => ({ token, user, isAuthenticated: Boolean(token && user), signIn, signOut, refetchMe }),
-    [token, user],
+    () => ({
+      token,
+      user,
+      isAuthenticated: Boolean(token && user),
+      signIn,
+      signInWithGoogle,
+      signOut,
+      refetchMe,
+    }),
+    [refetchMe, signIn, signInWithGoogle, signOut, token, user],
   );
 
   const value = useMemo<SessionContextValue>(
@@ -135,7 +208,7 @@ export const SessionProvider = ({ children }: PropsWithChildren) => {
       clearSession,
       isLoadingSession: isHydratingToken || (Boolean(token) && me.isPending),
     }),
-    [isHydratingToken, me.isPending, token, user],
+    [clearSession, isHydratingToken, me.isPending, session, token],
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;

@@ -1,5 +1,5 @@
 import React from "react";
-import { View, TouchableOpacity, Image, ScrollView } from "react-native";
+import { View, TouchableOpacity, ScrollView } from "react-native";
 import { useMercadinNavigation } from "@hooks/use-navigation";
 import { UnauthenticatedNavigation, UnauthenticatedRouteNames } from "@routes/types";
 import { useLogin } from "./hooks";
@@ -9,6 +9,7 @@ import { Text } from "@components/text";
 import { Button } from "@components/button";
 import { Input } from "@components/input";
 import { Icon } from "@components/icon";
+import { GoogleLoginButton } from "@pages/auth/components/google-login-button";
 
 export const SignIn = () => {
   const navigation = useMercadinNavigation<UnauthenticatedNavigation>();
@@ -88,17 +89,7 @@ export const SignIn = () => {
             ) : null}
           </View>
 
-          <View className="flex-row items-center">
-            <View className="flex-1 h-[1px] bg-zinc-100" />
-            <TouchableOpacity className="flex-row items-center justify-center border border-zinc-200 rounded-full px-6 py-2.5 mx-2 gap-2">
-              <Image
-                source={{ uri: "https://cdn-icons-png.flaticon.com/128/300/300221.png" }}
-                className="w-5 h-5"
-              />
-              <Text className="text-zinc-900 font-medium text-sm">Entrar com o Google</Text>
-            </TouchableOpacity>
-            <View className="flex-1 h-[1px] bg-zinc-100" />
-          </View>
+          <GoogleLoginButton />
         </CardContent>
 
         <CardFooter className="flex-row items-center justify-between gap-4">

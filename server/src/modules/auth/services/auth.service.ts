@@ -5,11 +5,11 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import { AuthUser, createClient, SupabaseClient } from "@supabase/supabase-js";
 import { SignUpDto } from "../dtos/sign-up.dto";
 import { SignInDto } from "../dtos/sign-in.dto";
-import { PrismaService } from "@/database/prisma.service";
 import { SignInWithToken } from "../dtos/sign-in-with-token.dto";
+import { UsersService } from "@/modules/users/services/users.service";
 
 @Injectable()
 export class AuthService {
@@ -18,7 +18,7 @@ export class AuthService {
 
   constructor(
     private readonly config: ConfigService,
-    private readonly prisma: PrismaService,
+    private readonly users: UsersService,
   ) {
     const supabaseUrl = this.config.get<string>("SUPABASE_URL");
     const supabaseKey = this.config.get<string>("SUPABASE_ANON_KEY");
@@ -54,31 +54,25 @@ export class AuthService {
     }
 
     try {
-      await this.prisma.user.upsert({
-        where: { id: data.user.id },
-        create: {
-          id: data.user.id,
-          email: dto.email,
-          name: dto.name,
-          avatarUrl: dto.avatarUrl,
-        },
-        update: {
-          name: dto.name,
-        },
+      await this.users.syncUser({
+        id: data.user.id,
+        email: dto.email,
+        name: dto.name,
+        avatarUrl: dto.avatarUrl,
       });
-    } catch (prismaError) {
+    } catch (syncError) {
       const { error: rollbackError } = await this.supabaseAdmin.auth.admin.deleteUser(data.user.id);
 
       if (rollbackError) {
         throw new InternalServerErrorException(
           "O cadastro local falhou e o rollback do usuário no Supabase não foi concluído",
-          { cause: prismaError },
+          { cause: syncError },
         );
       }
 
       throw new InternalServerErrorException(
         "Não foi possível criar o usuário no banco de dados da aplicação",
-        { cause: prismaError },
+        { cause: syncError },
       );
     }
 
@@ -102,12 +96,57 @@ export class AuthService {
     const { data, error } = await this.supabase.auth.signInWithIdToken({
       provider: dto.provider,
       token: dto.token,
+      access_token: dto.accessToken,
     });
 
     if (error) {
       throw new UnauthorizedException(error.message);
     }
 
+    if (!data.user) {
+      throw new UnauthorizedException("Não foi possível autenticar com o token informado");
+    }
+
+    await this.syncLocalUser(data.user);
+
     return data;
+  }
+
+  async syncSession(userId: string) {
+    const { data, error } = await this.supabaseAdmin.auth.admin.getUserById(userId);
+
+    if (error) {
+      throw new UnauthorizedException(error.message);
+    }
+
+    if (!data.user) {
+      throw new UnauthorizedException("Usuário autenticado não encontrado no Supabase");
+    }
+
+    return this.syncLocalUser(data.user);
+  }
+
+  private syncLocalUser(user: AuthUser) {
+    if (!user.email) {
+      throw new BadRequestException("O usuário autenticado não possui e-mail");
+    }
+
+    const metadata = user.user_metadata;
+    const name =
+      this.getMetadataString(metadata, "name") ?? this.getMetadataString(metadata, "full_name");
+    const avatarUrl =
+      this.getMetadataString(metadata, "avatar_url") ?? this.getMetadataString(metadata, "picture");
+
+    return this.users.syncUser({
+      id: user.id,
+      email: user.email,
+      name,
+      avatarUrl,
+    });
+  }
+
+  private getMetadataString(metadata: Record<string, unknown>, key: string) {
+    const value = metadata[key];
+    return typeof value === "string" && value.length > 0 ? value : undefined;
   }
 }

@@ -4,6 +4,7 @@ import { SignUpDto } from "../dtos/sign-up.dto";
 import { SignInDto } from "../dtos/sign-in.dto";
 import { Public } from "@/common/decorators/public.decorator";
 import { SignInWithToken } from "../dtos/sign-in-with-token.dto";
+import { AuthenticatedUser, CurrentUser } from "@/common/decorators/current-user.decorator";
 
 @Controller("auth")
 export class AuthController {
@@ -25,5 +26,10 @@ export class AuthController {
   @Post("sign-in-with-token")
   async signInWithToken(@Body() dto: SignInWithToken) {
     return this.authService.signInWithToken(dto);
+  }
+
+  @Post("sync-session")
+  async syncSession(@CurrentUser() user: AuthenticatedUser) {
+    return this.authService.syncSession(user.id);
   }
 }
