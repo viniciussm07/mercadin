@@ -7,6 +7,7 @@ import { Routes } from "./routes";
 import { SessionProvider } from "@contexts/session";
 import { PortalHost } from "@rn-primitives/portal";
 import { KeyboardProvider } from "@contexts/keyboard";
+import { LoadFontsProvider } from "@contexts/fonts";
 
 const queryClient = new QueryClient();
 
@@ -22,9 +23,11 @@ export const App = () => {
         <SafeAreaProvider>
           <SessionProvider>
             <KeyboardProvider>
-              <Routes />
-              <StatusBar style="light" />
-              <PortalHost />
+              <LoadFontsProvider>
+                <Routes />
+                <StatusBar style="light" />
+                <PortalHost />
+              </LoadFontsProvider>
             </KeyboardProvider>
           </SessionProvider>
         </SafeAreaProvider>

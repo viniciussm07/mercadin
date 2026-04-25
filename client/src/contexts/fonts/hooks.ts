@@ -7,7 +7,7 @@ import {
 } from "@expo-google-fonts/fraunces";
 import { Questrial_400Regular } from "@expo-google-fonts/questrial";
 
-export const loadFonts = () => {
+export const useLoadFonts = () => {
   const [fontsLoaded] = useFonts({
     Fraunces_400Regular,
     Fraunces_500Medium,
