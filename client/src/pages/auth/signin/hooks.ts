@@ -24,8 +24,8 @@ export const useLogin = () => {
 
   const form = useForm({
     defaultValues: {
-      email: "",
-      password: "",
+      email: "leonardo1234@gmail.com",
+      password: "123456",
     },
     validators: {
       onChange: signInSchema,

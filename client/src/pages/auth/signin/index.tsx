@@ -1,6 +1,5 @@
 import React from "react";
-import { View, TouchableOpacity, Image } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { View, TouchableOpacity, Image, ScrollView } from "react-native";
 import { useMercadinNavigation } from "@hooks/use-navigation";
 import { UnauthenticatedNavigation, UnauthenticatedRouteNames } from "@routes/types";
 import { useLogin } from "./hooks";
@@ -9,21 +8,29 @@ import { Card, CardContent, CardFooter, CardHeader } from "@components/card";
 import { Text } from "@components/text";
 import { Button } from "@components/button";
 import { Input } from "@components/input";
+import { Icon } from "@components/icon";
 
 export const SignIn = () => {
   const navigation = useMercadinNavigation<UnauthenticatedNavigation>();
   const { form, signInMutation, submitError } = useLogin();
 
   return (
-    <View className="flex-1 items-center justify-center px-6 py-10">
-      <Card>
-        <CardHeader className="flex-row items-center mb-8">
-          <TouchableOpacity className="mr-4 mt-1 border border-zinc-200 rounded-full p-2">
-            <Ionicons name="arrow-back" size={20} color="black" />
+    <ScrollView
+      className="flex-1 px-4"
+      contentContainerStyle={{ flexGrow: 1, justifyContent: "center", alignItems: "center" }}
+    >
+      <Card className="w-full max-w-md">
+        <CardHeader className="sm:flex-row items-center gap-4">
+          <TouchableOpacity
+            onPress={() => navigation.navigate(UnauthenticatedRouteNames.SIGNUP)}
+            className="rounded-full border border-zinc-200 p-2 self-start sm:self-center"
+          >
+            <Icon name="ArrowLeft" size={20} />
           </TouchableOpacity>
-          <View className="flex-1">
-            <Text className="text-3xl font-bold text-zinc-900">Faça login</Text>
-            <Text className="text-zinc-400 text-sm font-questrial">
+
+          <View>
+            <Text className="text-3xl font-bold text-zinc-900">Entrar</Text>
+            <Text className="text-sm text-zinc-400 font-questrial">
               Utilize e-mail e senha ou uma conta do Google.
             </Text>
           </View>
@@ -36,7 +43,7 @@ export const SignIn = () => {
 
               return (
                 <View>
-                  <Text className="text-zinc-700 font-semibold mb-1.5 ml-1">E-mail</Text>
+                  <Text className="text-zinc-700 font-semibold">E-mail</Text>
                   <Input
                     value={field.state.value}
                     placeholder="email@email.com"
@@ -59,7 +66,7 @@ export const SignIn = () => {
 
               return (
                 <View>
-                  <Text className="text-zinc-700 font-semibold mb-1.5 ml-1">Senha</Text>
+                  <Text className="text-zinc-700 font-semibold ">Senha</Text>
                   <Input
                     value={field.state.value}
                     placeholder="***********"
@@ -81,7 +88,7 @@ export const SignIn = () => {
             ) : null}
           </View>
 
-          <View className="flex-row items-center my-10">
+          <View className="flex-row items-center">
             <View className="flex-1 h-[1px] bg-zinc-100" />
             <TouchableOpacity className="flex-row items-center justify-center border border-zinc-200 rounded-full px-6 py-2.5 mx-2 gap-2">
               <Image
@@ -107,6 +114,6 @@ export const SignIn = () => {
           </Button>
         </CardFooter>
       </Card>
-    </View>
+    </ScrollView>
   );
 };

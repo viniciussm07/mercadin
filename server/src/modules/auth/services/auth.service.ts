@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException, BadRequestException } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  UnauthorizedException,
+} from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { SignUpDto } from "../dtos/sign-up.dto";
@@ -9,6 +14,7 @@ import { SignInWithToken } from "../dtos/sign-in-with-token.dto";
 @Injectable()
 export class AuthService {
   private readonly supabase: SupabaseClient;
+  private readonly supabaseAdmin: SupabaseClient;
 
   constructor(
     private readonly config: ConfigService,
@@ -16,12 +22,21 @@ export class AuthService {
   ) {
     const supabaseUrl = this.config.get<string>("SUPABASE_URL");
     const supabaseKey = this.config.get<string>("SUPABASE_ANON_KEY");
+    const supabaseServiceRoleKey = this.config.get<string>("SUPABASE_SERVICE_ROLE_KEY");
 
-    if (!supabaseUrl || !supabaseKey) {
-      throw new Error("SUPABASE_URL and SUPABASE_ANON_KEY are required for AuthService");
+    if (!supabaseUrl || !supabaseKey || !supabaseServiceRoleKey) {
+      throw new Error(
+        "SUPABASE_URL, SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY are required for AuthService",
+      );
     }
 
     this.supabase = createClient(supabaseUrl, supabaseKey);
+    this.supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
   }
 
   async signUp(dto: SignUpDto) {
@@ -34,7 +49,11 @@ export class AuthService {
       throw new BadRequestException(error.message);
     }
 
-    if (data.user) {
+    if (!data.user) {
+      throw new BadRequestException("Não foi possível criar o usuário no Supabase");
+    }
+
+    try {
       await this.prisma.user.upsert({
         where: { id: data.user.id },
         create: {
@@ -47,6 +66,20 @@ export class AuthService {
           name: dto.name,
         },
       });
+    } catch (prismaError) {
+      const { error: rollbackError } = await this.supabaseAdmin.auth.admin.deleteUser(data.user.id);
+
+      if (rollbackError) {
+        throw new InternalServerErrorException(
+          "O cadastro local falhou e o rollback do usuário no Supabase não foi concluído",
+          { cause: prismaError },
+        );
+      }
+
+      throw new InternalServerErrorException(
+        "Não foi possível criar o usuário no banco de dados da aplicação",
+        { cause: prismaError },
+      );
     }
 
     return data;

@@ -6,6 +6,7 @@ import { StatusBar } from "expo-status-bar";
 import { Routes } from "./routes";
 import { SessionProvider } from "@contexts/session";
 import { PortalHost } from "@rn-primitives/portal";
+import { KeyboardProvider } from "@contexts/keyboard";
 
 const queryClient = new QueryClient();
 
@@ -20,9 +21,11 @@ export const App = () => {
       >
         <SafeAreaProvider>
           <SessionProvider>
-            <Routes />
-            <StatusBar style="light" />
-            <PortalHost />
+            <KeyboardProvider>
+              <Routes />
+              <StatusBar style="light" />
+              <PortalHost />
+            </KeyboardProvider>
           </SessionProvider>
         </SafeAreaProvider>
       </NavigationContainer>

@@ -1,11 +1,9 @@
-export const getFieldErrorMessage = (errors: unknown[]) => {
+import { StandardSchemaV1Issue } from "@tanstack/react-form";
+
+export const getFieldErrorMessage = (errors: (StandardSchemaV1Issue | undefined)[]) => {
   const firstError = errors[0];
 
-  if (typeof firstError === "string") {
-    return firstError;
-  }
-
-  if (firstError instanceof Error) {
+  if (firstError) {
     return firstError.message;
   }
 

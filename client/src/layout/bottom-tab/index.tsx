@@ -2,10 +2,10 @@ import { Button } from "@components/button";
 import { Text } from "@components/text";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { NavigationRoute, ParamListBase } from "@react-navigation/native";
 import { UnauthenticatedRouteNames } from "@routes/types";
 import { cn } from "@utils/cn";
+import { Icon, IconName } from "@components/icon";
 
 interface OnPress {
   key: string;
@@ -17,14 +17,12 @@ interface OnLongPress {
   key: string;
 }
 
-type IoniconName = React.ComponentProps<typeof Ionicons>["name"];
-
 const MapRouteToIcon: Record<
   UnauthenticatedRouteNames,
-  { focused: IoniconName; unfocused: IoniconName }
+  { focused: IconName; unfocused: IconName }
 > = {
-  Login: { focused: "log-in", unfocused: "log-in-outline" } as const,
-  Signup: { focused: "person-add", unfocused: "person-add-outline" } as const,
+  Login: { focused: "User", unfocused: "User" } as const,
+  Signup: { focused: "UserPlus", unfocused: "UserPlus" } as const,
 } as const;
 
 const getRouteIcon = (routeName: string) => {
@@ -56,7 +54,7 @@ export const BottomTab = ({ state, descriptors, navigation }: BottomTabBarProps)
   };
 
   return (
-    <View className="flex flex-row w-full border-t border-border">
+    <View className="flex flex-row max-w-[300px] overflow-hidden bg-white w-full self-center justify-center rounded-full border border-border mb-6">
       {state.routes.map((route, index) => {
         const isFocused = state.index === index;
 
@@ -76,17 +74,20 @@ export const BottomTab = ({ state, descriptors, navigation }: BottomTabBarProps)
             key={route.key}
             onPress={() => onPress({ key: route.key, route, isFocused })}
             onLongPress={() => onLongPress({ key: route.key })}
-            className="w-full flex-1"
+            className={cn(
+              "flex-1 shadow-none items-center px-6 h-fit py-2 flex-col gap-0.5",
+              index % 2 !== 0 && "border-l border-border",
+            )}
             variant="secondary"
             rounded="none"
             size="xl"
           >
-            <Ionicons
+            <Icon
               name={isFocused ? icon.focused : icon.unfocused}
-              size={22}
+              size={24}
               className={cn(isFocused ? "text-primary" : "text-foreground")}
             />
-            <Text className={cn("font-semibold font-questrial", isFocused && "text-primary")}>
+            <Text className={cn("text-sm font-questrial", isFocused && "text-primary")}>
               {label}
             </Text>
           </Button>

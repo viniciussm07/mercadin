@@ -12,13 +12,21 @@ export enum UnauthenticatedRouteNames {
   SIGNUP = "Signup",
 }
 
+export enum AuthenticatedRouteNames {
+  DASHBOARD = "Dashboard",
+}
+
 export type UnauthenticatedTabParamList = {
   [UnauthenticatedRouteNames.LOGIN]: undefined;
   [UnauthenticatedRouteNames.SIGNUP]: undefined;
 };
 
+export type AuthenticatedTabParamList = {
+  [AuthenticatedRouteNames.DASHBOARD]: undefined;
+};
+
 export type RootStackParamList = {
-  [RootRouteNames.AUTHENTICATED]: undefined;
+  [RootRouteNames.AUTHENTICATED]: NavigatorScreenParams<AuthenticatedTabParamList>;
   [RootRouteNames.UNAUTHENTICATED]: NavigatorScreenParams<UnauthenticatedTabParamList>;
 };
 
@@ -26,5 +34,10 @@ export type RootNavigation = NativeStackNavigationProp<RootStackParamList>;
 
 export type UnauthenticatedNavigation = CompositeNavigationProp<
   BottomTabNavigationProp<UnauthenticatedTabParamList>,
+  NativeStackNavigationProp<RootStackParamList>
+>;
+
+export type AuthenticatedNavigation = CompositeNavigationProp<
+  BottomTabNavigationProp<AuthenticatedTabParamList>,
   NativeStackNavigationProp<RootStackParamList>
 >;

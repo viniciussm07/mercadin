@@ -6,6 +6,12 @@ export interface SignInPayload {
   password: string;
 }
 
+export interface SignUpPayload {
+  name: string;
+  email: string;
+  password: string;
+}
+
 export interface SignInResponse {
   session?: {
     access_token: string;
@@ -18,4 +24,6 @@ export interface SignInResponse {
 export const authService = {
   signIn: (payload: SignInPayload) =>
     apiClient.post(endpoints.auth.signIn, { json: payload }).json<SignInResponse>(),
+  signUp: (payload: SignUpPayload) =>
+    apiClient.post(endpoints.auth.signUp, { json: payload }).json<SignInResponse>(),
 };
