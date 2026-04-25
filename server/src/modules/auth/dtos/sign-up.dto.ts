@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength } from "class-validator";
+import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength } from "class-validator";
 
 export class SignUpDto {
   @IsString()
@@ -6,6 +6,7 @@ export class SignUpDto {
   name!: string;
 
   @IsString()
+  @IsOptional()
   avatarUrl?: string;
 
   @IsEmail({}, { message: "O e-mail fornecido é inválido" })

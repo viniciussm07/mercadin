@@ -1,16 +1,32 @@
-import { NavigationContainer } from "@react-navigation/native";
+import { useSession } from "@contexts/session";
+import { RootRouteNames } from "./types";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { Home } from "../pages/home";
-import { RouteNames } from "./types";
+import { RootStackParamList } from "./types";
+import { Text } from "@components/text";
+import { UnauthenticatedRoutesTabs } from "./unauthenticated";
 
-const Stack = createNativeStackNavigator();
+export const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export const Routes = () => {
+  const {
+    session: { isAuthenticated },
+    isLoadingSession,
+  } = useSession();
+
+  if (isLoadingSession) {
+    return null;
+  }
+
   return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name={RouteNames.HOME} component={Home} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {isAuthenticated ? (
+        <Stack.Screen
+          component={() => <Text>Autenticado</Text>}
+          name={RootRouteNames.AUTHENTICATED}
+        />
+      ) : (
+        <Stack.Screen name={RootRouteNames.UNAUTHENTICATED} component={UnauthenticatedRoutesTabs} />
+      )}
+    </Stack.Navigator>
   );
 };

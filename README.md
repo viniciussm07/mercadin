@@ -52,3 +52,9 @@ mercadin/
 ├── server/    # backend
 └── README.md
 ```
+
+# Login com Google
+
+O login nativo com Google usa `@react-native-google-signin/google-signin`, que depende de código nativo e requer development build do Expo. Ele não funciona no Expo Go.
+
+Configure `client/.env` a partir de `client/.env.example` com as chaves públicas do Supabase e os client IDs do Google. No web, o fluxo usa OAuth do Supabase; em Android/iOS, o app obtém o token do Google e o backend troca esse token por uma sessão Supabase.

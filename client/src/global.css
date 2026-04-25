@@ -1,3 +1,41 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html,
+  body {
+    font-family: "Fraunces", serif;
+    background-color: hsl(var(--background));
+  }
+
+  :root {
+    --background: 42.86 30.43% 95.49%;
+    --foreground: 26 21.6% 14.5%;
+    --card: 20 100% 99.4%;
+    --card-foreground: 26 21.6% 14.5%;
+    --popover: 20 100% 99.4%;
+    --popover-foreground: 26 21.6% 14.5%;
+    --primary: 22.12 100% 50%;
+    --primary-foreground: 20 100% 99.4%;
+    --secondary: 31 51% 90.4%;
+    --secondary-foreground: 26 21.6% 14.5%;
+    --muted: 30 40% 88.2%;
+    --muted-foreground: 27 18.8% 45.9%;
+    --accent: 0 0% 97.33%;
+    --accent-foreground: 24 77% 34.1%;
+    --destructive: 13 67.8% 53.7%;
+    --destructive-foreground: 20 100% 99.4%;
+    --border: 0 0% 93.33%;
+    --input: 29 39.2% 84.5%;
+    --ring: 27 87% 66.9%;
+    --radius: 0.625rem;
+    --chart-1: 22.12 100% 50%;
+    --chart-2: 113 23% 55.7%;
+    --chart-3: 13 67.8% 53.7%;
+    --chart-4: 43 74.3% 66.5%;
+    --chart-5: 16 17.5% 47.1%;
+  }
+}

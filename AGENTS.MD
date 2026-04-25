@@ -20,6 +20,14 @@ O projeto é um **monorepo** gerenciado com **pnpm**, dividido em duas aplicaç�
 - **Sem adivinhações:** Se um padrão arquitetural (onde colocar um arquivo, qual biblioteca usar) não for óbvio, pare e consulte as diretrizes abaixo ou pergunte ao usuário.
 - **Mantenha os arquivos organizados:** Siga rigorosamente as diretrizes de nomenclatura de arquivos (`index.tsx`, `hooks.ts`, etc.). Não crie nomes como `UserCard.tsx`.
 
+### 1.2 Fluxos de Trabalho e Comandos Confirmados
+- **Fonte de verdade dos scripts:** prefira os scripts de `client/package.json` e `server/package.json` quando houver divergência com aliases no root.
+- **Comandos válidos no root:** `pnpm lint`, `pnpm lint:fix`, `pnpm format`, `pnpm build:tsc`, `pnpm build:server`, `pnpm dev:client:ios`, `pnpm dev:client:android` e `pnpm dev:client:web`.
+- **Frontend (`client`):** use `pnpm --filter @mercadin/client dev`, `pnpm --filter @mercadin/client android`, `pnpm --filter @mercadin/client ios` e `pnpm --filter @mercadin/client web`.
+- **Backend (`server`):** use `docker compose -f server/docker-compose.yml up -d` para o Postgres local, copie `server/.env.example` para `server/.env`, depois rode `pnpm --filter @mercadin/server prisma:generate` e `pnpm --filter @mercadin/server prisma:migrate` (ou `pnpm --filter @mercadin/server prisma:push` quando a intenção for apenas sincronizar schema local). Para desenvolvimento, use `pnpm --filter @mercadin/server dev`; para build, `pnpm --filter @mercadin/server build`.
+- **TODO:** os aliases do root `pnpm dev:server`, `pnpm dev:client`, `pnpm build:client` e `pnpm build` estão desalinhados dos scripts atualmente expostos pelos pacotes; não presuma que funcionam até serem corrigidos.
+- **TODO:** o backend declara Jest como dependência de desenvolvimento, mas `server/package.json` não expõe um script `test`; confirme o fluxo de testes antes de instruir ou automatizar execuções.
+
 ---
 
 ## 2. Frontend (`/client`)
