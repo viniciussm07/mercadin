@@ -16,11 +16,11 @@ function dismissKeyboard() {
 export function KeyboardProvider({ children }: { children: React.ReactNode }) {
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1 }}
+      className="flex-1"
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <TouchableWithoutFeedback onPress={dismissKeyboard} accessible={false}>
-        <View style={{ flex: 1 }}>{children}</View>
+        <View className="flex-1">{children}</View>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   );

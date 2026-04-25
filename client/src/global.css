@@ -8,7 +8,7 @@
   html,
   body {
     font-family: "Fraunces", serif;
-    background-color: 42.86 30.43% 95.49%;
+    background-color: hsl(var(--background));
   }
 
   :root {

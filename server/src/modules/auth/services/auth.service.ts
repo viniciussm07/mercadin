@@ -8,7 +8,7 @@ import { ConfigService } from "@nestjs/config";
 import { AuthUser, createClient, SupabaseClient } from "@supabase/supabase-js";
 import { SignUpDto } from "../dtos/sign-up.dto";
 import { SignInDto } from "../dtos/sign-in.dto";
-import { SignInWithToken } from "../dtos/sign-in-with-token.dto";
+import { SignInWithTokenDto } from "../dtos/sign-in-with-token.dto";
 import { UsersService } from "@/modules/users/services/users.service";
 
 @Injectable()
@@ -92,7 +92,7 @@ export class AuthService {
     return data;
   }
 
-  async signInWithToken(dto: SignInWithToken) {
+  async signInWithToken(dto: SignInWithTokenDto) {
     const { data, error } = await this.supabase.auth.signInWithIdToken({
       provider: dto.provider,
       token: dto.token,

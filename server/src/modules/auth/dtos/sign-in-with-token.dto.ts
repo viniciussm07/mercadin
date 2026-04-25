@@ -1,7 +1,7 @@
 import { Provider } from "@supabase/supabase-js";
 import { IsIn, IsNotEmpty, IsOptional, IsString } from "class-validator";
 
-export class SignInWithToken {
+export class SignInWithTokenDto {
   @IsString()
   @IsNotEmpty()
   @IsIn(["google"])

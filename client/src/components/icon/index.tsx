@@ -22,7 +22,7 @@ export const Icon = memo((props: Props) => {
         },
       },
     });
-  }, []);
+  }, [props.name]);
 
   return <CustomIcon {...props} />;
 });

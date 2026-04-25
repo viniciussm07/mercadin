@@ -1,6 +1,7 @@
 import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
 import reactPlugin from "eslint-plugin-react";
+import reactHooksPlugin from "eslint-plugin-react-hooks";
 import reactNativePlugin from "eslint-plugin-react-native";
 import prettierPlugin from "eslint-plugin-prettier/recommended";
 import globals from "globals";
@@ -31,6 +32,7 @@ export default tseslint.config(
     },
     plugins: {
       react: reactPlugin,
+      "react-hooks": reactHooksPlugin,
       "react-native": reactNativePlugin,
     },
     rules: {
@@ -52,6 +54,8 @@ export default tseslint.config(
       // Regras para React
       "react/jsx-uses-react": "error",
       "react/jsx-uses-vars": "error",
+      "react-hooks/rules-of-hooks": "warn",
+      "react-hooks/exhaustive-deps": "warn",
 
       "react-native/no-unused-styles": "error",
       "react-native/split-platform-components": "error",
