@@ -1,7 +1,7 @@
 import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";
 
-const SESSION_TOKEN_KEY = "mercadin:session-token";
+const SESSION_TOKEN_KEY = "mercadin-session-token";
 
 export const sessionTokenStorage = {
   async getToken() {

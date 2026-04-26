@@ -1,26 +1,44 @@
-import { Text } from "@components/text";
-import { BottomTab } from "@layout/bottom-tab";
-import { HeaderTabBar } from "@layout/header-tab-bar";
+import { HeaderMobile } from "@layout/header-mobile";
+import { TabBar } from "@layout/tab-bar";
+import { Home } from "@pages/home";
+import { MyLists } from "@pages/my-lists";
+import { Promotions } from "@pages/promotions";
+import { SearchItems } from "@pages/search-items";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { AuthenticatedRouteNames, AuthenticatedTabParamList } from "@routes/types";
-import { Dimensions, Platform } from "react-native";
+import { env } from "@utils/environment";
 
 const Tab = createBottomTabNavigator<AuthenticatedTabParamList>();
-const isWeb = Platform.OS === "web" && Dimensions.get("window").width >= 768;
 
 export const AuthenticatedRoutesTabs = () => {
   return (
     <Tab.Navigator
-      tabBar={props => (isWeb ? <HeaderTabBar {...props} /> : <BottomTab {...props} />)}
+      tabBar={TabBar}
       screenOptions={{
-        headerShown: false,
-        tabBarPosition: isWeb ? "top" : "bottom",
+        header: !env.isWeb ? HeaderMobile : undefined,
+        headerShown: !env.isWeb,
+        tabBarPosition: env.isWeb ? "top" : "bottom",
       }}
     >
       <Tab.Screen
         name={AuthenticatedRouteNames.DASHBOARD}
-        options={{ tabBarLabel: "Dashboard" }}
-        component={() => <Text>Dashboard</Text>}
+        options={{ tabBarLabel: "Início" }}
+        component={Home}
+      />
+      <Tab.Screen
+        name={AuthenticatedRouteNames.MY_LISTS}
+        options={{ tabBarLabel: "Listas" }}
+        component={MyLists}
+      />
+      <Tab.Screen
+        name={AuthenticatedRouteNames.PROMOTIONS}
+        options={{ tabBarLabel: "Promoções" }}
+        component={Promotions}
+      />
+      <Tab.Screen
+        name={AuthenticatedRouteNames.SEARCH_ITEMS}
+        options={{ tabBarLabel: "Buscar" }}
+        component={SearchItems}
       />
     </Tab.Navigator>
   );

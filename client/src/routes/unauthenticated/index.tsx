@@ -1,21 +1,21 @@
-import { BottomTab } from "@layout/bottom-tab";
-import { HeaderTabBar } from "@layout/header-tab-bar";
+import { HeaderMobile } from "@layout/header-mobile";
+import { TabBar } from "@layout/tab-bar";
 import { SignIn } from "@pages/auth/signin";
 import { SignUp } from "@pages/auth/signup";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { UnauthenticatedRouteNames, UnauthenticatedTabParamList } from "@routes/types";
-import { Dimensions, Platform } from "react-native";
+import { env } from "@utils/environment";
 
 const Tab = createBottomTabNavigator<UnauthenticatedTabParamList>();
-const isWeb = Platform.OS === "web" && Dimensions.get("window").width >= 768;
 
 export const UnauthenticatedRoutesTabs = () => {
   return (
     <Tab.Navigator
-      tabBar={props => (isWeb ? <HeaderTabBar {...props} /> : <BottomTab {...props} />)}
+      tabBar={TabBar}
       screenOptions={{
-        headerShown: false,
-        tabBarPosition: isWeb ? "top" : "bottom",
+        header: !env.isWeb ? HeaderMobile : undefined,
+        headerShown: !env.isWeb,
+        tabBarPosition: env.isWeb ? "top" : "bottom",
       }}
     >
       <Tab.Screen

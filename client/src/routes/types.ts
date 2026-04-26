@@ -14,6 +14,9 @@ export enum UnauthenticatedRouteNames {
 
 export enum AuthenticatedRouteNames {
   DASHBOARD = "Dashboard",
+  MY_LISTS = "MyLists",
+  PROMOTIONS = "Promotions",
+  SEARCH_ITEMS = "SearchItems",
 }
 
 export type UnauthenticatedTabParamList = {
@@ -23,6 +26,9 @@ export type UnauthenticatedTabParamList = {
 
 export type AuthenticatedTabParamList = {
   [AuthenticatedRouteNames.DASHBOARD]: undefined;
+  [AuthenticatedRouteNames.MY_LISTS]: undefined;
+  [AuthenticatedRouteNames.PROMOTIONS]: undefined;
+  [AuthenticatedRouteNames.SEARCH_ITEMS]: undefined;
 };
 
 export type RootStackParamList = {
