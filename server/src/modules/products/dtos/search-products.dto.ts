@@ -1,4 +1,5 @@
-import { IsOptional, IsString, MinLength } from "class-validator";
+import { IsEnum, IsOptional, IsString, MinLength } from "class-validator";
+import { MARKET_SLUGS } from "@/common/constants/market-slugs.constant";
 
 export class SearchProductsDto {
   @IsString()
@@ -6,6 +7,6 @@ export class SearchProductsDto {
   q!: string;
 
   @IsOptional()
-  @IsString()
-  market?: string;
+  @IsEnum(MARKET_SLUGS)
+  market?: MARKET_SLUGS;
 }

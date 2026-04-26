@@ -13,9 +13,10 @@ export class ProductIngestService {
   ) {}
 
   async ingest(batch: ScrapedBatch): Promise<void> {
-    const market = await this.markets.upsertByName({
+    const market = await this.markets.upsertBySlug({
       name: batch.marketName,
       url: batch.marketUrl,
+      slug: batch.marketSlug,
     });
 
     for (const product of batch.products) {

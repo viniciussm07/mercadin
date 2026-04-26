@@ -9,6 +9,7 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:migrate:reset": "prisma migrate reset",
     "prisma:push": "prisma db push",
+    "prisma:reset": "pnpm prisma db push --force-reset && pnpm prisma migrate reset",
     "format": "prettier --write \"src/**/*.ts\"",
     "start": "node dist/main.js",
     "dev": "nest start --watch",

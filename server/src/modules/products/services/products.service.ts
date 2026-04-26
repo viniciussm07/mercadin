@@ -13,7 +13,7 @@ export class ProductsService {
 
   async search(query: string, marketSlug?: string) {
     const marketName = marketSlug
-      ? this.orchestrator.findScraper(marketSlug)?.marketName
+      ? this.orchestrator.findScraper(marketSlug)!.marketName
       : undefined;
 
     const cached = await this.repo.findFreshByQuery({ q: query, marketName });

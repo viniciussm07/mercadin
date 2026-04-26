@@ -8,9 +8,11 @@ const SEARCH_PATH = "/on/demandware.store/Sites-JauServe-Site/pt_BR/Search-Show"
 const USER_AGENT =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
+import { MARKET_SLUGS } from "@/common/constants/market-slugs.constant";
+
 @Injectable()
 export class JauserveScraper implements IMarketScraper {
-  readonly marketSlug = "jauserve";
+  readonly marketSlug = MARKET_SLUGS.JAU_SERVE;
   readonly marketName = "Jaú Serve";
   readonly marketUrl = BASE_URL;
 
