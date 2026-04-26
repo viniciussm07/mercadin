@@ -99,21 +99,13 @@ export const BottomTabBar = ({ state, descriptors, navigation }: BottomTabBarPro
                     exiting={labelExiting}
                     className="w-fit flex-col items-center gap-0.5"
                   >
-                    <Icon
-                      name={isFocused ? icon.focused : icon.unfocused}
-                      size={24}
-                      className={cn(isFocused ? "text-primary" : "text-foreground")}
-                    />
+                    <Icon name={icon.focused} size={24} className="text-primary" />
                     <Text className="font-questrial text-xs text-nowrap break-keep text-primary">
                       {label}
                     </Text>
                   </Animated.View>
                 ) : (
-                  <Icon
-                    name={isFocused ? icon.focused : icon.unfocused}
-                    size={24}
-                    className={cn(isFocused ? "text-primary" : "text-foreground")}
-                  />
+                  <Icon name={icon.unfocused} size={24} className="text-foreground" />
                 )}
               </Button>
             </Animated.View>
