@@ -82,3 +82,4 @@ jobs:
             # mandatory
             -Dsonar.projectKey=viniciussm07_mercadin
             -Dsonar.organization=ssc0535-mercadin
+            -Dsonar.working.directory=/tmp/sonar
