@@ -21,6 +21,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": ">=24.13.0 <25"
+  },
   "packageManager": "pnpm@10.31.0",
   "devDependencies": {
     "@eslint/js": "^9.39.2",
