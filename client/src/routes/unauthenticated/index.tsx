@@ -13,7 +13,7 @@ export const UnauthenticatedRoutesTabs = () => {
     <Tab.Navigator
       tabBar={TabBar}
       screenOptions={{
-        header: !env.isWeb ? HeaderMobile : undefined,
+        header: !env.isWeb ? props => <HeaderMobile {...props} /> : undefined,
         headerShown: !env.isWeb,
         tabBarPosition: env.isWeb ? "top" : "bottom",
       }}

@@ -35,6 +35,7 @@ export const TopTabBar = ({ state, descriptors, navigation }: BottomTabBarProps)
   const {
     session: { isAuthenticated },
   } = useSession();
+
   const onPress = ({ key, route, isFocused }: OnPress) => {
     const event = navigation.emit({
       type: "tabPress",
@@ -58,8 +59,18 @@ export const TopTabBar = ({ state, descriptors, navigation }: BottomTabBarProps)
     <View className="h-20 flex-row items-center gap-6 border-b border-zinc-100 bg-white px-8">
       <View className="flex-row justify-between gap-4 flex-1">
         <View className="flex-row items-center gap-2">
-          <Icon name="ShoppingBasket" size={32} className="text-primary" />
-          <Text className="text-2xl font-extrabold text-foreground">Mercadin</Text>
+          <Icon
+            name="ShoppingBasket"
+            size={32}
+            className="text-primary cursor-pointer"
+            onPress={() => navigation.navigate(AuthenticatedRouteNames.DASHBOARD)}
+          />
+          <Text
+            className="text-2xl font-extrabold text-foreground"
+            onPress={() => navigation.navigate(AuthenticatedRouteNames.DASHBOARD)}
+          >
+            Mercadin
+          </Text>
         </View>
       </View>
 
@@ -70,7 +81,15 @@ export const TopTabBar = ({ state, descriptors, navigation }: BottomTabBarProps)
             className="col-[1/1] row-[1/1] z-10 ml-2 self-center text-muted-foreground"
             size={18}
           />
-          <Input placeholder="Procurar..." className="col-[1/1] row-[1/1] pl-8" />
+          <Input
+            placeholder="Procurar..."
+            className={cn(
+              "col-[1/1] row-[1/1] pl-8",
+              state.routes[state.index].name === AuthenticatedRouteNames.SEARCH_ITEMS &&
+                "border-ring ring-ring/50 ring-[3px]",
+            )}
+            onChangeText={() => navigation.navigate(AuthenticatedRouteNames.SEARCH_ITEMS)}
+          />
         </View>
       )}
 
