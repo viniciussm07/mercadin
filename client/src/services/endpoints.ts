@@ -8,6 +8,9 @@ export const endpoints = {
   users: {
     me: "users/me",
   },
+  products: {
+    search: "products/search",
+  },
   shoppingLists: {
     root: "shopping-lists",
   },

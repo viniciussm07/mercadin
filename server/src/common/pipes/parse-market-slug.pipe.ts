@@ -1,32 +1,25 @@
-import {
-  ArgumentMetadata,
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-  PipeTransform,
-} from "@nestjs/common";
+import { BadRequestException, Injectable, PipeTransform } from "@nestjs/common";
 import { MARKET_SLUGS } from "../constants/market-slugs.constant";
-import { MarketsRepository } from "@/modules/markets/repositories/markets.repository";
 
 @Injectable()
-export class ParseMarketSlugPipe implements PipeTransform<string | undefined, Promise<string | undefined>> {
-  constructor(private readonly marketsRepo: MarketsRepository) {}
-
-  async transform(value: string | undefined, metadata: ArgumentMetadata): Promise<string | undefined> {
+export class ParseMarketSlugPipe implements PipeTransform<
+  string | string[] | undefined,
+  Promise<MARKET_SLUGS[] | undefined>
+> {
+  async transform(value: string | string[] | undefined): Promise<MARKET_SLUGS[] | undefined> {
     if (!value) {
-      return value;
+      return undefined;
     }
 
+    const marketSlugs = [...new Set(Array.isArray(value) ? value : [value])];
     const validSlugs = Object.values(MARKET_SLUGS) as string[];
-    if (!validSlugs.includes(value)) {
-      throw new BadRequestException(`Invalid market: ${value}`);
+
+    for (const marketSlug of marketSlugs) {
+      if (!validSlugs.includes(marketSlug)) {
+        throw new BadRequestException(`Invalid market: ${marketSlug}`);
+      }
     }
 
-    const market = await this.marketsRepo.findBySlug(value);
-    if (!market) {
-      throw new NotFoundException(`Market with slug '${value}' not found in database.`);
-    }
-
-    return value;
+    return marketSlugs as MARKET_SLUGS[];
   }
 }

@@ -13,9 +13,9 @@ export class ProductsController {
   @Get("search")
   search(
     @Query() dto: SearchProductsDto,
-    @Query("market", ParseMarketSlugPipe) marketSlug?: MARKET_SLUGS,
+    @Query("market", ParseMarketSlugPipe) marketSlugs?: MARKET_SLUGS[],
   ) {
-    return this.products.search(dto.q, marketSlug);
+    return this.products.search(dto.q, marketSlugs);
   }
 
   @Public()

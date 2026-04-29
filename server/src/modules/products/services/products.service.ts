@@ -11,25 +11,64 @@ export class ProductsService {
     private readonly orchestrator: ScrapingOrchestratorService,
   ) {}
 
-  async search(query: string, marketSlug?: string) {
-    const marketName = marketSlug
-      ? this.orchestrator.findScraper(marketSlug)!.marketName
-      : undefined;
+  async search(query: string, marketSlugs?: string[]) {
+    const normalizedQuery = query.trim().toLowerCase();
+    const marketNames =
+      marketSlugs && marketSlugs.length > 0
+        ? marketSlugs.map(marketSlug => this.orchestrator.findScraper(marketSlug)!.marketName)
+        : undefined;
 
-    const cached = await this.repo.findFreshByQuery({ q: query, marketName });
-    if (cached.length > 0) {
-      return { source: "cache" as const, items: cached };
-    }
-
-    const batches = await this.orchestrator.search(query, marketSlug);
-    for (const batch of batches) {
-      if (batch.products.length > 0) {
-        await this.ingest.ingest(batch);
+    if (!marketSlugs || marketSlugs.length === 0) {
+      const fresh = await this.repo.isQueryFresh(normalizedQuery, null);
+      if (fresh) {
+        return {
+          source: "cache" as const,
+          items: await this.repo.findByQuery({ q: query }),
+        };
       }
+
+      const batches = await this.orchestrator.search(query);
+      for (const batch of batches) {
+        if (batch.products.length > 0) {
+          await this.ingest.ingest(batch);
+        }
+      }
+
+      if (batches.length === this.orchestrator.listScrapers().length) {
+        await this.repo.touchQueryCache(normalizedQuery, null);
+      }
+
+      return {
+        source: "scrape" as const,
+        items: await this.repo.findByQuery({ q: query }),
+      };
     }
 
-    const fresh = await this.repo.findFreshByQuery({ q: query, marketName });
-    return { source: "scrape" as const, items: fresh };
+    let source: "cache" | "scrape" = "cache";
+    for (const marketSlug of marketSlugs) {
+      const fresh = await this.repo.isQueryFresh(normalizedQuery, marketSlug);
+      if (fresh) {
+        continue;
+      }
+
+      const batches = await this.orchestrator.search(query, marketSlug);
+      const scrapedMarket = batches.some(batch => batch.marketSlug === marketSlug);
+      for (const batch of batches) {
+        if (batch.products.length > 0) {
+          await this.ingest.ingest(batch);
+        }
+      }
+
+      if (scrapedMarket) {
+        await this.repo.touchQueryCache(normalizedQuery, marketSlug);
+      }
+      source = "scrape";
+    }
+
+    return {
+      source,
+      items: await this.repo.findByQuery({ q: query, marketNames }),
+    };
   }
 
   findAll() {

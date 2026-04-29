@@ -10,6 +10,7 @@ import { env } from "@utils/environment";
 import { Input } from "@components/input";
 import { UserMenu } from "@layout/user-menu";
 import { useSession } from "@contexts/session";
+import { useProductSearchStore } from "@stores/product-search";
 
 interface OnPress {
   key: string;
@@ -35,6 +36,13 @@ export const TopTabBar = ({ state, descriptors, navigation }: BottomTabBarProps)
   const {
     session: { isAuthenticated },
   } = useSession();
+  const query = useProductSearchStore(state => state.query);
+  const setQuery = useProductSearchStore(state => state.setQuery);
+
+  const onChangeSearch = (nextQuery: string) => {
+    setQuery(nextQuery);
+    navigation.navigate(AuthenticatedRouteNames.SEARCH_ITEMS);
+  };
 
   const onPress = ({ key, route, isFocused }: OnPress) => {
     const event = navigation.emit({
@@ -82,13 +90,14 @@ export const TopTabBar = ({ state, descriptors, navigation }: BottomTabBarProps)
             size={18}
           />
           <Input
+            value={query}
             placeholder="Procurar..."
             className={cn(
               "col-[1/1] row-[1/1] pl-8",
               state.routes[state.index].name === AuthenticatedRouteNames.SEARCH_ITEMS &&
                 "border-ring ring-ring/50 ring-[3px]",
             )}
-            onChangeText={() => navigation.navigate(AuthenticatedRouteNames.SEARCH_ITEMS)}
+            onChangeText={onChangeSearch}
           />
         </View>
       )}

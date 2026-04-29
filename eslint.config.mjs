@@ -39,7 +39,7 @@ export default tseslint.config(
       // Regras básicas solicitadas
       semi: ["error", "always"],
       quotes: ["error", "double"],
-      "max-lines": ["warn", { max: 300, skipBlankLines: false }],
+      "max-lines": ["warn", { max: 150, skipBlankLines: false }],
 
       // Outras regras importantes
       "no-console": ["warn", { allow: ["warn", "error"] }],

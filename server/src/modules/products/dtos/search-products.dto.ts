@@ -7,6 +7,6 @@ export class SearchProductsDto {
   q!: string;
 
   @IsOptional()
-  @IsEnum(MARKET_SLUGS)
-  market?: MARKET_SLUGS;
+  @IsEnum(MARKET_SLUGS, { each: true })
+  market?: MARKET_SLUGS | MARKET_SLUGS[];
 }
