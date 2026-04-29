@@ -35,7 +35,7 @@ export class JauserveScraper implements IMarketScraper {
     $("div.grid-tile").each((_, el) => {
       const tile = $(el);
       const ean = tile.attr("data-pid")?.trim();
-      if (!ean || !/^\d{8,14}$/.test(ean)) return;
+      if (!ean || !/^\d{4,5}$|^\d{8,14}$/.test(ean)) return;
 
       const anchor = tile.find("a.link.txt-ellipsis").first();
       const href = anchor.attr("href")?.trim();

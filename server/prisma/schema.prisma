@@ -122,7 +122,7 @@ model ShoppingListItem {
 model SearchCache {
   id            String    @id @default(uuid())
   query         String    // termo normalizado (lowercase, trimmed)
-  marketSlug    String?   // null = todos os mercados
+  marketSlug    String    // slug do mercado ou ALL para todos os mercados
   lastScrapedAt DateTime  @default(now())
 
   @@unique([query, marketSlug])

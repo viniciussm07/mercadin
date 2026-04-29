@@ -2,23 +2,27 @@ import { Injectable } from "@nestjs/common";
 import { PrismaService } from "@/database/prisma.service";
 
 export const QUERY_TTL_MS = 6 * 60 * 60 * 1000; // 6h
+const ALL_MARKETS_CACHE_SCOPE = "ALL";
+
+const getCacheMarketSlug = (marketSlug: string | null) => marketSlug ?? ALL_MARKETS_CACHE_SCOPE;
 
 @Injectable()
 export class ProductsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  findByQuery(params: { q: string; marketNames?: string[] }) {
-    const { q, marketNames } = params;
+  findByQuery(params: { q: string; marketSlugs?: string[]; ttlMs?: number }) {
+    const { q, marketSlugs, ttlMs = QUERY_TTL_MS } = params;
+    const threshold = new Date(Date.now() - ttlMs);
 
     return this.prisma.marketProduct.findMany({
       where: {
         isAvailable: true,
+        lastScrapedAt: { gte: threshold },
         nameInMarket: { contains: q, mode: "insensitive" },
-        ...(marketNames && marketNames.length > 0 ? { market: { name: { in: marketNames } } } : {}),
+        ...(marketSlugs && marketSlugs.length > 0 ? { market: { slug: { in: marketSlugs } } } : {}),
       },
       include: { market: true, masterProduct: true },
-      orderBy: { currentPrice: "asc" },
-      take: 100,
+      take: 200,
     });
   }
 
@@ -28,26 +32,19 @@ export class ProductsRepository {
     ttlMs = QUERY_TTL_MS,
   ): Promise<boolean> {
     const threshold = new Date(Date.now() - ttlMs);
-    const entry = await this.prisma.searchCache.findFirst({
-      where: { query, marketSlug },
+    const entry = await this.prisma.searchCache.findUnique({
+      where: { query_marketSlug: { query, marketSlug: getCacheMarketSlug(marketSlug) } },
     });
     return entry !== null && entry.lastScrapedAt >= threshold;
   }
 
   async touchQueryCache(query: string, marketSlug: string | null): Promise<void> {
-    const existing = await this.prisma.searchCache.findFirst({
-      where: { query, marketSlug },
+    const cacheMarketSlug = getCacheMarketSlug(marketSlug);
+    await this.prisma.searchCache.upsert({
+      where: { query_marketSlug: { query, marketSlug: cacheMarketSlug } },
+      create: { query, marketSlug: cacheMarketSlug, lastScrapedAt: new Date() },
+      update: { lastScrapedAt: new Date() },
     });
-    if (existing) {
-      await this.prisma.searchCache.update({
-        where: { id: existing.id },
-        data: { lastScrapedAt: new Date() },
-      });
-    } else {
-      await this.prisma.searchCache.create({
-        data: { query, marketSlug, lastScrapedAt: new Date() },
-      });
-    }
   }
 
   findAll() {

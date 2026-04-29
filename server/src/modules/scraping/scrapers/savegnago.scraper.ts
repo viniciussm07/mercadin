@@ -9,7 +9,7 @@ const USER_AGENT =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null;
+  typeof value === "object" && value !== null && !Array.isArray(value);
 
 @Injectable()
 export class SavegnagoScraper implements IMarketScraper {
@@ -45,8 +45,12 @@ export class SavegnagoScraper implements IMarketScraper {
       for (const item of items) {
         if (!isRecord(item)) continue;
 
-        const ean = typeof item.ean === "string" ? item.ean.trim() : "";
-        if (!ean || !/^\d{8,14}$/.test(ean)) continue;
+        const EAN_REGEX = /^\d{4,5}$|^\d{8,14}$/;
+        const rawEan = typeof item.ean === "string" ? item.ean.trim() : "";
+        const rawPlu =
+          typeof product.productReference === "string" ? product.productReference.trim() : "";
+        const ean = EAN_REGEX.test(rawEan) ? rawEan : /^\d{4,5}$/.test(rawPlu) ? rawPlu : "";
+        if (!ean) continue;
 
         const sellers = item.sellers;
         const seller = Array.isArray(sellers) ? sellers[0] : undefined;

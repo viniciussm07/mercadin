@@ -10,7 +10,7 @@ const USER_AGENT =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null;
+  typeof value === "object" && value !== null && !Array.isArray(value);
 
 @Injectable()
 export class TendaAtacadoScraper implements IMarketScraper {
@@ -64,7 +64,7 @@ export class TendaAtacadoScraper implements IMarketScraper {
       if (!Number.isFinite(price) || price <= 0) continue;
 
       const ean = String(p.barcode ?? "").trim();
-      if (!ean || !/^\d{8,14}$/.test(ean)) continue;
+      if (!ean || !/^\d{4,5}$|^\d{8,14}$/.test(ean)) continue;
 
       const sku = typeof p.sku === "string" ? p.sku : ean;
       const imageUrl = typeof p.thumbnail === "string" ? p.thumbnail : undefined;

@@ -1,7 +1,10 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { ProductsRepository } from "../repositories/products.repository";
 import { ProductIngestService } from "./product-ingest.service";
 import { ScrapingOrchestratorService } from "@/modules/scraping/scraping-orchestrator.service";
+import { rankResults } from "../utils/rank-results";
+
+const SEARCH_QUERY_MIN_LENGTH = 2;
 
 @Injectable()
 export class ProductsService {
@@ -12,22 +15,28 @@ export class ProductsService {
   ) {}
 
   async search(query: string, marketSlugs?: string[]) {
-    const normalizedQuery = query.trim().toLowerCase();
-    const marketNames =
-      marketSlugs && marketSlugs.length > 0
-        ? marketSlugs.map(marketSlug => this.orchestrator.findScraper(marketSlug)!.marketName)
-        : undefined;
+    const trimmedQuery = query.trim();
+    if (trimmedQuery.length < SEARCH_QUERY_MIN_LENGTH) {
+      throw new BadRequestException("Search query must have at least 2 characters.");
+    }
 
-    if (!marketSlugs || marketSlugs.length === 0) {
+    const normalizedQuery = trimmedQuery.toLowerCase();
+    const selectedMarketSlugs =
+      marketSlugs && marketSlugs.length > 0 ? [...new Set(marketSlugs)] : undefined;
+
+    if (!selectedMarketSlugs) {
       const fresh = await this.repo.isQueryFresh(normalizedQuery, null);
       if (fresh) {
         return {
           source: "cache" as const,
-          items: await this.repo.findByQuery({ q: query }),
+          items: rankResults(
+            normalizedQuery,
+            await this.repo.findByQuery({ q: trimmedQuery }),
+          ).slice(0, 100),
         };
       }
 
-      const batches = await this.orchestrator.search(query);
+      const batches = await this.orchestrator.search(trimmedQuery);
       for (const batch of batches) {
         if (batch.products.length > 0) {
           await this.ingest.ingest(batch);
@@ -39,19 +48,22 @@ export class ProductsService {
       }
 
       return {
-        source: "scrape" as const,
-        items: await this.repo.findByQuery({ q: query }),
+        source: batches.length > 0 ? ("scrape" as const) : ("cache" as const),
+        items: rankResults(normalizedQuery, await this.repo.findByQuery({ q: trimmedQuery })).slice(
+          0,
+          100,
+        ),
       };
     }
 
     let source: "cache" | "scrape" = "cache";
-    for (const marketSlug of marketSlugs) {
+    for (const marketSlug of selectedMarketSlugs) {
       const fresh = await this.repo.isQueryFresh(normalizedQuery, marketSlug);
       if (fresh) {
         continue;
       }
 
-      const batches = await this.orchestrator.search(query, marketSlug);
+      const batches = await this.orchestrator.search(trimmedQuery, marketSlug);
       const scrapedMarket = batches.some(batch => batch.marketSlug === marketSlug);
       for (const batch of batches) {
         if (batch.products.length > 0) {
@@ -61,13 +73,16 @@ export class ProductsService {
 
       if (scrapedMarket) {
         await this.repo.touchQueryCache(normalizedQuery, marketSlug);
+        source = "scrape";
       }
-      source = "scrape";
     }
 
     return {
       source,
-      items: await this.repo.findByQuery({ q: query, marketNames }),
+      items: rankResults(
+        normalizedQuery,
+        await this.repo.findByQuery({ q: trimmedQuery, marketSlugs: selectedMarketSlugs }),
+      ).slice(0, 100),
     };
   }
 
