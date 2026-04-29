@@ -8,4 +8,7 @@ export const endpoints = {
   users: {
     me: "users/me",
   },
+  shoppingLists: {
+    root: "shopping-lists",
+  },
 } as const;
