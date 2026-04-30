@@ -1,4 +1,3 @@
-import { MarketProduct } from "@services/products";
 import { env } from "@utils/environment";
 import { useMemo } from "react";
 import { ScrollView, View } from "react-native";
@@ -9,50 +8,13 @@ import { ProductGroupCard } from "./components/product-group-card";
 import { ProductResultSkeleton } from "./components/product-result-skeleton";
 import { SearchInput } from "./components/search-input";
 import { useSearchProducts } from "./hooks";
-import { ProductGroup } from "./types";
 
 const wideContentContainerStyle = { paddingBottom: 120, paddingTop: 56 };
 const FLOATING_SEARCH_HEIGHT = 96;
 
-const groupProductsByEan = (products: MarketProduct[]) => {
-  const groups = new Map<string, ProductGroup>();
-
-  for (const product of products) {
-    const ean = product.masterProduct.ean;
-    const currentGroup = groups.get(ean);
-
-    if (currentGroup) {
-      currentGroup.offers.push(product);
-      continue;
-    }
-
-    groups.set(ean, {
-      ean,
-      masterProduct: product.masterProduct,
-      offers: [product],
-    });
-  }
-
-  return Array.from(groups.values())
-    .map(group => ({
-      ...group,
-      offers: group.offers.sort((first, second) => first.currentPrice - second.currentPrice),
-    }))
-    .sort((first, second) => {
-      const offersDifference = second.offers.length - first.offers.length;
-
-      if (offersDifference !== 0) {
-        return offersDifference;
-      }
-
-      return first.offers[0].currentPrice - second.offers[0].currentPrice;
-    });
-};
-
 export const SearchItemsPage = () => {
   const { debouncedQuery, hasValidQuery, products } = useSearchProducts();
-  const items = useMemo(() => products.data?.items ?? [], [products.data?.items]);
-  const productGroups = useMemo(() => groupProductsByEan(items), [items]);
+  const productGroups = useMemo(() => products.data?.items ?? [], [products.data?.items]);
   const { top } = useSafeAreaInsets();
   const mobileContentContainerStyle = useMemo(
     () => ({
@@ -104,7 +66,7 @@ export const SearchItemsPage = () => {
             />
           ) : null}
 
-          {hasValidQuery && products.isSuccess && items.length === 0 ? (
+          {hasValidQuery && products.isSuccess && productGroups.length === 0 ? (
             <EmptyState
               title="Nenhum produto encontrado"
               description={`Não encontramos resultados para "${debouncedQuery}".`}

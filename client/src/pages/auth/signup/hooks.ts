@@ -1,10 +1,11 @@
-import { SignUpPayload, authService } from "@services/auth";
+import { authService } from "@services/auth";
 import { getHttpErrorMessage } from "@services/http";
 import { useForm } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { signUpSchema } from "./validators";
 import { useSession } from "@contexts/session";
+import { SignUpPayload } from "@services/auth/types";
 
 export const useSignUp = () => {
   const {

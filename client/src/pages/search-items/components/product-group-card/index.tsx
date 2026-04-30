@@ -2,8 +2,8 @@ import { Button } from "@components/button";
 import { Card, CardContent, CardHeader } from "@components/card";
 import { Icon } from "@components/icon";
 import { Text } from "@components/text";
+import { ProductGroup } from "@services/products/types";
 import { Image, View } from "react-native";
-import { ProductGroup } from "../../types";
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -48,7 +48,7 @@ export const ProductGroupCard = ({ group }: { group: ProductGroup }) => {
             <View className="flex-row flex-wrap items-center justify-between gap-3">
               <View className="rounded-full bg-primary/10 px-2 py-1">
                 <Text className="font-questrial text-[10px] uppercase text-primary">
-                  {group.offers.length} {group.offers.length === 1 ? "mercado" : "mercados"}
+                  {group.items.length} {group.items.length === 1 ? "mercado" : "mercados"}
                 </Text>
               </View>
             </View>
@@ -57,7 +57,7 @@ export const ProductGroupCard = ({ group }: { group: ProductGroup }) => {
       </CardHeader>
 
       <CardContent className="gap-0 py-2">
-        {group.offers.map((offer, index) => (
+        {group.items.map((offer, index) => (
           <View
             key={offer.id}
             className="flex-row items-center gap-3 border-border py-3 first:border-t-0"
@@ -65,7 +65,7 @@ export const ProductGroupCard = ({ group }: { group: ProductGroup }) => {
             <View className="min-w-0 flex-1 gap-1">
               <View className="flex-row flex-wrap items-center gap-2">
                 <Text className="font-semibold text-foreground">{offer.market.name}</Text>
-                {group.offers.length !== 1 && index === 0 ? (
+                {group.items.length !== 1 && index === 0 ? (
                   <View className="rounded-full bg-green-700/10 px-2 py-1">
                     <Text className="font-questrial text-[10px] uppercase text-green-700">
                       Melhor preço

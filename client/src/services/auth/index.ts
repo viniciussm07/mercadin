@@ -1,31 +1,6 @@
 import { endpoints } from "@services/endpoints";
 import { apiClient } from "@services/http";
-
-export interface SignInPayload {
-  email: string;
-  password: string;
-}
-
-export interface SignUpPayload {
-  name: string;
-  email: string;
-  password: string;
-}
-
-export interface SignInWithTokenPayload {
-  provider: "google";
-  token: string;
-  accessToken?: string;
-}
-
-export interface SignInResponse {
-  session?: {
-    access_token: string;
-    expires_at?: number | null;
-    refresh_token?: string;
-    token_type?: string;
-  } | null;
-}
+import { SignInPayload, SignInResponse, SignInWithTokenPayload, SignUpPayload } from "./types";
 
 export const authService = {
   signIn: (payload: SignInPayload) =>
