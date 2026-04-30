@@ -9,8 +9,12 @@ export class ShoppingListsRepository {
   findAllByUser(userId: string) {
     return this.prisma.shoppingList.findMany({
       where: { userId },
-      orderBy: { updatedAt: "desc" },
-      include: { items: true },
+      orderBy: { updatedAt: "asc" },
+      include: {
+        items: {
+          orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        },
+      },
     });
   }
 
@@ -18,6 +22,25 @@ export class ShoppingListsRepository {
     return this.prisma.shoppingList.findFirst({
       where: { id, userId },
       ...options,
+    });
+  }
+
+  findDetailsByIdForUser(id: string, userId: string) {
+    return this.prisma.shoppingList.findFirst({
+      where: { id, userId },
+      include: {
+        items: {
+          orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+          include: {
+            marketProduct: {
+              include: {
+                market: true,
+                masterProduct: true,
+              },
+            },
+          },
+        },
+      },
     });
   }
 
@@ -39,6 +62,46 @@ export class ShoppingListsRepository {
     });
   }
 
+  findListIdsByUser(listIds: string[], userId: string) {
+    return this.prisma.shoppingList.findMany({
+      where: { id: { in: listIds }, userId },
+      select: { id: true },
+    });
+  }
+
+  findListItemsByMarketProduct(listIds: string[], marketProductId: string) {
+    return this.prisma.shoppingListItem.findMany({
+      where: { listId: { in: listIds }, marketProductId },
+      select: { listId: true },
+    });
+  }
+
+  addItemToLists(listIds: string[], marketProductId: string, quantity: number) {
+    return this.prisma.$transaction(
+      listIds.map(listId =>
+        this.prisma.shoppingListItem.create({
+          data: { listId, marketProductId, quantity },
+        }),
+      ),
+    );
+  }
+
+  async updateItemQuantity(listId: string, marketProductId: string, quantity: number) {
+    const item = await this.prisma.shoppingListItem.findFirst({
+      where: { listId, marketProductId },
+      select: { id: true },
+    });
+
+    if (!item) {
+      return null;
+    }
+
+    return this.prisma.shoppingListItem.update({
+      where: { id: item.id },
+      data: { quantity },
+    });
+  }
+
   removeItem(itemId: string) {
     return this.prisma.shoppingListItem.delete({ where: { id: itemId } });
   }
@@ -46,6 +109,7 @@ export class ShoppingListsRepository {
   findItemsWithVariants(listId: string) {
     return this.prisma.shoppingListItem.findMany({
       where: { listId },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
       include: {
         marketProduct: {
           include: {

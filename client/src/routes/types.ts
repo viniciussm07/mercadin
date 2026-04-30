@@ -19,6 +19,11 @@ export enum AuthenticatedRouteNames {
   SEARCH_ITEMS = "SearchItems",
 }
 
+export enum AuthenticatedStackRouteNames {
+  TABS = "AuthenticatedTabs",
+  SHOPPING_LIST_DETAILS = "ShoppingListDetails",
+}
+
 export type UnauthenticatedTabParamList = {
   [UnauthenticatedRouteNames.LOGIN]: undefined;
   [UnauthenticatedRouteNames.SIGNUP]: undefined;
@@ -31,8 +36,13 @@ export type AuthenticatedTabParamList = {
   [AuthenticatedRouteNames.SEARCH_ITEMS]: undefined;
 };
 
+export type AuthenticatedStackParamList = {
+  [AuthenticatedStackRouteNames.TABS]: NavigatorScreenParams<AuthenticatedTabParamList>;
+  [AuthenticatedStackRouteNames.SHOPPING_LIST_DETAILS]: { listId: string };
+};
+
 export type RootStackParamList = {
-  [RootRouteNames.AUTHENTICATED]: NavigatorScreenParams<AuthenticatedTabParamList>;
+  [RootRouteNames.AUTHENTICATED]: NavigatorScreenParams<AuthenticatedStackParamList>;
   [RootRouteNames.UNAUTHENTICATED]: NavigatorScreenParams<UnauthenticatedTabParamList>;
 };
 
@@ -45,5 +55,8 @@ export type UnauthenticatedNavigation = CompositeNavigationProp<
 
 export type AuthenticatedNavigation = CompositeNavigationProp<
   BottomTabNavigationProp<AuthenticatedTabParamList>,
-  NativeStackNavigationProp<RootStackParamList>
+  CompositeNavigationProp<
+    NativeStackNavigationProp<AuthenticatedStackParamList>,
+    NativeStackNavigationProp<RootStackParamList>
+  >
 >;

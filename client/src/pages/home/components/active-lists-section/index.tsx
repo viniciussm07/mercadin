@@ -1,11 +1,22 @@
 import { View } from "react-native";
 import { Card, CardContent } from "@components/card";
+import { DeleteShoppingListDialog } from "@pages/my-lists/components/delete-shopping-list-dialog";
 import { Text } from "@components/text";
-import { useActiveShoppingLists } from "../../hooks";
+import { useActiveListsSection } from "./hooks";
 import { ShoppingListCard } from "./components/shopping-list-card";
 
 export const ActiveListsSection = () => {
-  const { shoppingLists } = useActiveShoppingLists();
+  const {
+    confirmDeleteList,
+    deleteError,
+    isDeleteDialogOpen,
+    listToDelete,
+    openList,
+    removeShoppingList,
+    requestDeleteList,
+    setIsDeleteDialogOpen,
+    shoppingLists,
+  } = useActiveListsSection();
   const lists = shoppingLists.data ?? [];
 
   return (
@@ -13,6 +24,14 @@ export const ActiveListsSection = () => {
       <View>
         <Text className="text-2xl font-bold text-foreground">Suas listas ativas</Text>
       </View>
+
+      {deleteError ? (
+        <Card className="border-0 bg-white py-5">
+          <CardContent>
+            <Text className="font-questrial text-destructive">{deleteError}</Text>
+          </CardContent>
+        </Card>
+      ) : null}
 
       {shoppingLists.isPending ? (
         <Card className="border-0 bg-white py-5">
@@ -45,10 +64,24 @@ export const ActiveListsSection = () => {
       {lists.length > 0 ? (
         <View className="gap-3 lg:flex-row">
           {lists.slice(0, 3).map(list => (
-            <ShoppingListCard key={list.id} list={list} />
+            <ShoppingListCard
+              key={list.id}
+              isDeleting={removeShoppingList.isPending && removeShoppingList.variables === list.id}
+              list={list}
+              onDelete={requestDeleteList}
+              onOpen={openList}
+            />
           ))}
         </View>
       ) : null}
+
+      <DeleteShoppingListDialog
+        isDeleting={removeShoppingList.isPending}
+        listName={listToDelete?.name}
+        open={isDeleteDialogOpen}
+        onConfirm={confirmDeleteList}
+        onOpenChange={setIsDeleteDialogOpen}
+      />
     </View>
   );
 };

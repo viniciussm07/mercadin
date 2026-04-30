@@ -4,27 +4,27 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@components/dropdown-menu";
-import { Pressable, View } from "react-native";
 import { Card, CardContent } from "@components/card";
 import { Icon } from "@components/icon";
 import { Text } from "@components/text";
+import { formatUpdatedAt } from "@pages/home/utils";
 import { ShoppingList } from "@services/shopping-lists/types";
-import { formatUpdatedAt } from "../../../../utils";
+import { Pressable, View } from "react-native";
 
-interface ShoppingListCardProps {
+interface MyListCardProps {
   isDeleting: boolean;
   list: ShoppingList;
   onDelete: (list: ShoppingList) => void;
   onOpen: (listId: string) => void;
 }
 
-export const ShoppingListCard = ({ isDeleting, list, onDelete, onOpen }: ShoppingListCardProps) => {
+export const MyListCard = ({ isDeleting, list, onDelete, onOpen }: MyListCardProps) => {
   return (
-    <Pressable onPress={() => onOpen(list.id)} className="flex-1">
-      <Card className="min-h-[150px] justify-between border-0 bg-white py-5 shadow-sm">
-        <CardContent className="flex-1 justify-between gap-5">
+    <Pressable onPress={() => onOpen(list.id)}>
+      <Card className="gap-0 border-0 bg-white py-0 shadow-sm">
+        <CardContent className="gap-4 py-5">
           <View className="flex-row items-start justify-between gap-3">
-            <Pressable className="min-w-0 flex-1" onPress={() => onOpen(list.id)}>
+            <Pressable className="min-w-0 flex-1 gap-1">
               <Text numberOfLines={1} className="text-lg font-bold text-foreground">
                 {list.name}
               </Text>
@@ -34,7 +34,7 @@ export const ShoppingListCard = ({ isDeleting, list, onDelete, onOpen }: Shoppin
             </Pressable>
 
             <DropdownMenu>
-              <DropdownMenuTrigger className="size-8 items-center justify-center rounded-full bg-primary/10">
+              <DropdownMenuTrigger className="size-9 items-center justify-center rounded-full bg-primary/10">
                 <Icon name="Ellipsis" size={16} className="text-primary" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" side="bottom" sideOffset={8}>
@@ -50,27 +50,14 @@ export const ShoppingListCard = ({ isDeleting, list, onDelete, onOpen }: Shoppin
             </DropdownMenu>
           </View>
 
-          <View className="flex-row items-center justify-between">
-            <View className="flex-row items-center">
-              {list.items.slice(0, 3).map(item => (
-                <View
-                  key={item.id}
-                  className="-mr-2 size-8 items-center justify-center rounded-full border-2 border-white bg-accent"
-                >
-                  <Icon name="Package" size={14} className="text-muted-foreground" />
-                </View>
-              ))}
-              {list.items.length === 0 ? (
-                <Text className="font-questrial text-sm text-muted-foreground">Sem itens</Text>
-              ) : null}
-            </View>
-
-            <View className="rounded-full bg-primary/10 px-2 py-1">
-              <Text className="font-questrial text-[10px] uppercase text-primary">
+          <Pressable className="flex-row items-center justify-between gap-3">
+            <View className="flex-row items-center gap-2">
+              <Icon name="Package" size={18} className="text-muted-foreground" />
+              <Text className="font-questrial text-sm text-muted-foreground">
                 {list.items.length} {list.items.length === 1 ? "item" : "itens"}
               </Text>
             </View>
-          </View>
+          </Pressable>
         </CardContent>
       </Card>
     </Pressable>

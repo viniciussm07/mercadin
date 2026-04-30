@@ -110,6 +110,7 @@ model ShoppingList {
 model ShoppingListItem {
   id              String    @id @default(uuid())
   quantity        Int       @default(1) // Quantidade desejada pelo usuário
+  createdAt       DateTime  @default(now()) // Data em que o item foi adicionado à lista
   
   listId          String
   marketProductId String
