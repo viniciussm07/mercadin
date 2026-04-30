@@ -1,4 +1,4 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import * as cheerio from "cheerio";
 import type { IMarketScraper } from "../interfaces/market-scraper.interface";
 import type { ScrapedProduct } from "../types/scraped-product.type";
@@ -16,16 +16,13 @@ export class JauserveScraper implements IMarketScraper {
   readonly marketName = "Jaú Serve";
   readonly marketUrl = BASE_URL;
 
-  private readonly logger = new Logger(JauserveScraper.name);
-
   async search(query: string): Promise<ScrapedProduct[]> {
     const url = `${BASE_URL}${SEARCH_PATH}?q=${encodeURIComponent(query)}`;
     const res = await fetch(url, {
       headers: { "User-Agent": USER_AGENT, Accept: "text/html" },
     });
     if (!res.ok) {
-      this.logger.warn(`Jauserve search failed (${res.status}) for query "${query}"`);
-      return [];
+      throw new Error(`Jauserve search failed (${res.status}) for query "${query}"`);
     }
     const html = await res.text();
     return this.parse(html);
@@ -38,7 +35,7 @@ export class JauserveScraper implements IMarketScraper {
     $("div.grid-tile").each((_, el) => {
       const tile = $(el);
       const ean = tile.attr("data-pid")?.trim();
-      if (!ean || !/^\d{8,14}$/.test(ean)) return;
+      if (!ean || !/^\d{4,5}$|^\d{8,14}$/.test(ean)) return;
 
       const anchor = tile.find("a.link.txt-ellipsis").first();
       const href = anchor.attr("href")?.trim();

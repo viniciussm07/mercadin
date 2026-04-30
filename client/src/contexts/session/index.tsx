@@ -11,12 +11,14 @@ import { Platform } from "react-native";
 import { useQueryClient } from "@tanstack/react-query";
 import { getHttpErrorMessage, isUnauthorizedError, setApiAccessToken } from "@services/http";
 import { sessionTokenStorage } from "@services/session-storage";
-import { SessionUser, usersService } from "@services/users";
+import { usersService } from "@services/users";
 import { useGetMe } from "./hooks/get-me";
 import { SESSION_QUERY_KEY } from "./keys";
-import { authService, SignInPayload } from "@services/auth";
+import { authService } from "@services/auth";
 import { googleAuthService } from "@services/google-auth";
 import { getSupabaseClient, isSupabaseConfigured } from "@services/supabase";
+import { SessionUser } from "@services/users/types";
+import { SignInPayload } from "@services/auth/types";
 
 interface SessionContextValue {
   session: {

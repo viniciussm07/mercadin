@@ -1,7 +1,11 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { ProductsRepository } from "../repositories/products.repository";
 import { ProductIngestService } from "./product-ingest.service";
 import { ScrapingOrchestratorService } from "@/modules/scraping/scraping-orchestrator.service";
+import { rankResults } from "../utils/rank-results";
+import { ProductSearchGroup, ProductsSearchResponse } from "./types";
+
+const SEARCH_QUERY_MIN_LENGTH = 2;
 
 @Injectable()
 export class ProductsService {
@@ -11,25 +15,104 @@ export class ProductsService {
     private readonly orchestrator: ScrapingOrchestratorService,
   ) {}
 
-  async search(query: string, marketSlug?: string) {
-    const marketName = marketSlug
-      ? this.orchestrator.findScraper(marketSlug)!.marketName
-      : undefined;
-
-    const cached = await this.repo.findFreshByQuery({ q: query, marketName });
-    if (cached.length > 0) {
-      return { source: "cache" as const, items: cached };
+  async search(query: string, marketSlugs?: string[]): Promise<ProductsSearchResponse> {
+    const trimmedQuery = query.trim();
+    if (trimmedQuery.length < SEARCH_QUERY_MIN_LENGTH) {
+      throw new BadRequestException("Search query must have at least 2 characters.");
     }
 
-    const batches = await this.orchestrator.search(query, marketSlug);
-    for (const batch of batches) {
-      if (batch.products.length > 0) {
-        await this.ingest.ingest(batch);
+    const normalizedQuery = trimmedQuery.toLowerCase();
+    const selectedMarketSlugs =
+      marketSlugs && marketSlugs.length > 0 ? [...new Set(marketSlugs)] : undefined;
+
+    if (!selectedMarketSlugs) {
+      const fresh = await this.repo.isQueryFresh(normalizedQuery, null);
+      if (fresh) {
+        return {
+          source: "cache" as const,
+          items: await this.findGroupedSearchResults(normalizedQuery, trimmedQuery),
+        };
+      }
+
+      const batches = await this.orchestrator.search(trimmedQuery);
+      for (const batch of batches) {
+        if (batch.products.length > 0) {
+          await this.ingest.ingest(batch);
+        }
+      }
+
+      if (batches.length === this.orchestrator.listScrapers().length) {
+        await this.repo.touchQueryCache(normalizedQuery, null);
+      }
+
+      return {
+        source: batches.length > 0 ? ("scrape" as const) : ("cache" as const),
+        items: await this.findGroupedSearchResults(normalizedQuery, trimmedQuery),
+      };
+    }
+
+    let source: "cache" | "scrape" = "cache";
+    for (const marketSlug of selectedMarketSlugs) {
+      const fresh = await this.repo.isQueryFresh(normalizedQuery, marketSlug);
+      if (fresh) {
+        continue;
+      }
+
+      const batches = await this.orchestrator.search(trimmedQuery, marketSlug);
+      const scrapedMarket = batches.some(batch => batch.marketSlug === marketSlug);
+      for (const batch of batches) {
+        if (batch.products.length > 0) {
+          await this.ingest.ingest(batch);
+        }
+      }
+
+      if (scrapedMarket) {
+        await this.repo.touchQueryCache(normalizedQuery, marketSlug);
+        source = "scrape";
       }
     }
 
-    const fresh = await this.repo.findFreshByQuery({ q: query, marketName });
-    return { source: "scrape" as const, items: fresh };
+    return {
+      source,
+      items: await this.findGroupedSearchResults(
+        normalizedQuery,
+        trimmedQuery,
+        selectedMarketSlugs,
+      ),
+    };
+  }
+
+  private async findGroupedSearchResults(
+    normalizedQuery: string,
+    query: string,
+    marketSlugs?: string[],
+  ): Promise<ProductSearchGroup[]> {
+    const products = await this.repo.findByQuery({ q: query, marketSlugs });
+    const rankedProducts = rankResults(normalizedQuery, products);
+    const groups = new Map<string, ProductSearchGroup>();
+
+    for (const product of rankedProducts) {
+      const groupKey = product.masterProductId;
+      const currentGroup = groups.get(groupKey);
+
+      if (currentGroup) {
+        currentGroup.items.push(product);
+        continue;
+      }
+
+      groups.set(groupKey, {
+        ean: product.masterProduct.ean,
+        masterProduct: product.masterProduct,
+        items: [product],
+      });
+    }
+
+    return Array.from(groups.values())
+      .map(group => ({
+        ...group,
+        offers: group.items.sort((first, second) => first.currentPrice - second.currentPrice),
+      }))
+      .slice(0, 100);
   }
 
   findAll() {

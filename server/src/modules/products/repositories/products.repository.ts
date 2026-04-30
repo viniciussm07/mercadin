@@ -1,14 +1,17 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "@/database/prisma.service";
 
-export const PRODUCT_TTL_MS = 6 * 60 * 60 * 1000; // 6h
+export const QUERY_TTL_MS = 6 * 60 * 60 * 1000; // 6h
+const ALL_MARKETS_CACHE_SCOPE = "ALL";
+
+const getCacheMarketSlug = (marketSlug: string | null) => marketSlug ?? ALL_MARKETS_CACHE_SCOPE;
 
 @Injectable()
 export class ProductsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  findFreshByQuery(params: { q: string; marketName?: string; ttlMs?: number }) {
-    const { q, marketName, ttlMs = PRODUCT_TTL_MS } = params;
+  findByQuery(params: { q: string; marketSlugs?: string[]; ttlMs?: number }) {
+    const { q, marketSlugs, ttlMs = QUERY_TTL_MS } = params;
     const threshold = new Date(Date.now() - ttlMs);
 
     return this.prisma.marketProduct.findMany({
@@ -16,11 +19,31 @@ export class ProductsRepository {
         isAvailable: true,
         lastScrapedAt: { gte: threshold },
         nameInMarket: { contains: q, mode: "insensitive" },
-        ...(marketName ? { market: { name: marketName } } : {}),
+        ...(marketSlugs && marketSlugs.length > 0 ? { market: { slug: { in: marketSlugs } } } : {}),
       },
       include: { market: true, masterProduct: true },
-      orderBy: { currentPrice: "asc" },
-      take: 100,
+      take: 200,
+    });
+  }
+
+  async isQueryFresh(
+    query: string,
+    marketSlug: string | null,
+    ttlMs = QUERY_TTL_MS,
+  ): Promise<boolean> {
+    const threshold = new Date(Date.now() - ttlMs);
+    const entry = await this.prisma.searchCache.findUnique({
+      where: { query_marketSlug: { query, marketSlug: getCacheMarketSlug(marketSlug) } },
+    });
+    return entry !== null && entry.lastScrapedAt >= threshold;
+  }
+
+  async touchQueryCache(query: string, marketSlug: string | null): Promise<void> {
+    const cacheMarketSlug = getCacheMarketSlug(marketSlug);
+    await this.prisma.searchCache.upsert({
+      where: { query_marketSlug: { query, marketSlug: cacheMarketSlug } },
+      create: { query, marketSlug: cacheMarketSlug, lastScrapedAt: new Date() },
+      update: { lastScrapedAt: new Date() },
     });
   }
 

@@ -1,10 +1,10 @@
-import { SignInPayload } from "@services/auth";
 import { getHttpErrorMessage } from "@services/http";
 import { useForm } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
 import { signInSchema } from "./validators";
 import { useState } from "react";
 import { useSession } from "@contexts/session";
+import { SignInPayload } from "@services/auth/types";
 
 export const useLogin = () => {
   const {

@@ -118,6 +118,16 @@ model ShoppingListItem {
   marketProduct   MarketProduct @relation(fields: [marketProductId], references: [id])
 }
 
+// Cache de queries de busca — controla quando um termo precisa ser re-raspado
+model SearchCache {
+  id            String    @id @default(uuid())
+  query         String    // termo normalizado (lowercase, trimmed)
+  marketSlug    String    // slug do mercado ou ALL para todos os mercados
+  lastScrapedAt DateTime  @default(now())
+
+  @@unique([query, marketSlug])
+}
+
 // Produtos Favoritados para Monitoramento de Preço
 model FavoriteProduct {
   userId           String

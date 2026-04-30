@@ -3,7 +3,7 @@ import { TabBar } from "@layout/tab-bar";
 import { Home } from "@pages/home";
 import { MyLists } from "@pages/my-lists";
 import { Promotions } from "@pages/promotions";
-import { SearchItems } from "@pages/search-items";
+import { SearchItemsPage } from "@pages/search-items";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { AuthenticatedRouteNames, AuthenticatedTabParamList } from "@routes/types";
 import { env } from "@utils/environment";
@@ -37,8 +37,8 @@ export const AuthenticatedRoutesTabs = () => {
       />
       <Tab.Screen
         name={AuthenticatedRouteNames.SEARCH_ITEMS}
-        options={{ tabBarLabel: "Buscar" }}
-        component={SearchItems}
+        options={{ tabBarLabel: "Buscar", headerShown: false }}
+        component={SearchItemsPage}
       />
     </Tab.Navigator>
   );

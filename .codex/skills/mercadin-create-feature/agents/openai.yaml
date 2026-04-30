@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mercadin Feature Builder"
+  short_description: "Cria features aderentes ao Mercadin"
+  default_prompt: "Use $mercadin-create-feature to implement a frontend or backend feature in Mercadin following repository patterns."
