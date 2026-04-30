@@ -7,6 +7,8 @@ const BASE_URL = "https://www.savegnago.com.br";
 const SEARCH_PATH = "/api/catalog_system/pub/products/search";
 const USER_AGENT =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+const EAN_REGEX = /^\d{4,5}$|^\d{8,14}$/;
+const PLU_FALLBACK_REGEX = /^\d{4,5}$/;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -45,11 +47,10 @@ export class SavegnagoScraper implements IMarketScraper {
       for (const item of items) {
         if (!isRecord(item)) continue;
 
-        const EAN_REGEX = /^\d{4,5}$|^\d{8,14}$/;
         const rawEan = typeof item.ean === "string" ? item.ean.trim() : "";
         const rawPlu =
           typeof product.productReference === "string" ? product.productReference.trim() : "";
-        const ean = EAN_REGEX.test(rawEan) ? rawEan : /^\d{4,5}$/.test(rawPlu) ? rawPlu : "";
+        const ean = EAN_REGEX.test(rawEan) ? rawEan : PLU_FALLBACK_REGEX.test(rawPlu) ? rawPlu : "";
         if (!ean) continue;
 
         const sellers = item.sellers;
