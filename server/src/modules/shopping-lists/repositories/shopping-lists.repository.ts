@@ -9,7 +9,7 @@ export class ShoppingListsRepository {
   findAllByUser(userId: string) {
     return this.prisma.shoppingList.findMany({
       where: { userId },
-      orderBy: { updatedAt: "asc" },
+      orderBy: { updatedAt: "desc" },
       include: {
         items: {
           orderBy: [{ createdAt: "desc" }, { id: "desc" }],
@@ -57,8 +57,15 @@ export class ShoppingListsRepository {
   }
 
   addItem(listId: string, marketProductId: string, quantity: number) {
-    return this.prisma.shoppingListItem.create({
-      data: { listId, marketProductId, quantity },
+    return this.prisma.shoppingListItem.upsert({
+      where: {
+        listId_marketProductId: {
+          listId,
+          marketProductId,
+        },
+      },
+      create: { listId, marketProductId, quantity },
+      update: { quantity },
     });
   }
 
@@ -77,29 +84,30 @@ export class ShoppingListsRepository {
   }
 
   addItemToLists(listIds: string[], marketProductId: string, quantity: number) {
-    return this.prisma.$transaction(
-      listIds.map(listId =>
-        this.prisma.shoppingListItem.create({
-          data: { listId, marketProductId, quantity },
-        }),
-      ),
-    );
+    return this.prisma.shoppingListItem.createManyAndReturn({
+      data: listIds.map(listId => ({ listId, marketProductId, quantity })),
+      skipDuplicates: true,
+    });
   }
 
   async updateItemQuantity(listId: string, marketProductId: string, quantity: number) {
-    const item = await this.prisma.shoppingListItem.findFirst({
-      where: { listId, marketProductId },
-      select: { id: true },
-    });
+    try {
+      return await this.prisma.shoppingListItem.update({
+        where: {
+          listId_marketProductId: {
+            listId,
+            marketProductId,
+          },
+        },
+        data: { quantity },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+        return null;
+      }
 
-    if (!item) {
-      return null;
+      throw error;
     }
-
-    return this.prisma.shoppingListItem.update({
-      where: { id: item.id },
-      data: { quantity },
-    });
   }
 
   removeItem(itemId: string) {

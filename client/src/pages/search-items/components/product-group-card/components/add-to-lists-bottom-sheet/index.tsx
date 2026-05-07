@@ -9,12 +9,12 @@ import {
 } from "@components/bottom-sheet";
 import { Button } from "@components/button";
 import { Icon } from "@components/icon";
+import { QuantityCounter } from "@components/quantity-counter";
 import { Text } from "@components/text";
 import { MarketProduct } from "@services/products/types";
 import { View } from "react-native";
 import { ListSelector } from "./components/list-selector";
 import { ListSearchInput } from "./components/list-search-input";
-import { QuantityCounter } from "../../../../../../components/quantity-counter";
 import { useAddToListsBottomSheet } from "./hooks";
 
 type AddToListsBottomSheetProps = {

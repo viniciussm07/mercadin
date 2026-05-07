@@ -1,4 +1,4 @@
-import { ArrayNotEmpty, IsArray, IsInt, IsOptional, IsString, Min } from "class-validator";
+import { ArrayNotEmpty, IsArray, IsInt, IsString, Min } from "class-validator";
 
 export class AddItemToListsDto {
   @IsArray()
@@ -9,7 +9,6 @@ export class AddItemToListsDto {
   @IsString()
   marketProductId!: string;
 
-  @IsOptional()
   @IsInt()
   @Min(1)
   quantity = 1;
