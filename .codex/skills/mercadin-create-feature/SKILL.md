@@ -26,6 +26,8 @@ Use this skill to implement features in `/Users/leoldev/Repos/mercadin` while pr
 - Keep TypeScript strict. Do not use `any`, `@ts-ignore`, or untyped escape hatches unless the user explicitly authorizes it.
 - Do not add dependencies unless the user asks or the existing codebase already establishes the package as the right tool.
 - Do not create files with ad hoc names when the project has a pattern. Components use folders in `kebab-case` with `index.tsx`; colocated logic uses `hooks.ts`; exported shared types use `types.ts`.
+- Keep files at 150 lines or less. If a file would exceed that, split it into focused subcomponents, hooks, or helpers before continuing.
+- Do not put logic in component bodies. Prefer moving state derivation, handlers, effects, and data orchestration into custom hooks.
 - Do not place business logic in frontend services or backend controllers.
 - Do not access Prisma outside backend repositories.
 - Use NativeWind classes for React Native styling. Avoid `StyleSheet.create` except for a documented platform limitation.

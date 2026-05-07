@@ -110,12 +110,15 @@ model ShoppingList {
 model ShoppingListItem {
   id              String    @id @default(uuid())
   quantity        Int       @default(1) // Quantidade desejada pelo usuário
+  createdAt       DateTime  @default(now()) // Data em que o item foi adicionado à lista
   
   listId          String
   marketProductId String
   
   list            ShoppingList  @relation(fields: [listId], references: [id], onDelete: Cascade)
   marketProduct   MarketProduct @relation(fields: [marketProductId], references: [id])
+
+  @@unique([listId, marketProductId])
 }
 
 // Cache de queries de busca — controla quando um termo precisa ser re-raspado

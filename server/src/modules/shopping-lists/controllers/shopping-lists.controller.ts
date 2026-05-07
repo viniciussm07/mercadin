@@ -4,6 +4,8 @@ import { PriceCombinationService } from "../services/price-combination.service";
 import { CreateListDto } from "../dtos/create-list.dto";
 import { UpdateListDto } from "../dtos/update-list.dto";
 import { AddItemDto } from "../dtos/add-item.dto";
+import { AddItemToListsDto } from "../dtos/add-item-to-lists.dto";
+import { UpdateItemQuantityDto } from "../dtos/update-item-quantity.dto";
 import { CurrentUser, AuthenticatedUser } from "@/common/decorators/current-user.decorator";
 
 @Controller("shopping-lists")
@@ -42,6 +44,11 @@ export class ShoppingListsController {
     return this.lists.remove(id, user.id);
   }
 
+  @Post("items/bulk")
+  addItemToLists(@CurrentUser() user: AuthenticatedUser, @Body() dto: AddItemToListsDto) {
+    return this.lists.addItemToLists(user.id, dto);
+  }
+
   @Post(":id/items")
   addItem(
     @CurrentUser() user: AuthenticatedUser,
@@ -49,6 +56,15 @@ export class ShoppingListsController {
     @Body() dto: AddItemDto,
   ) {
     return this.lists.addItem(id, user.id, dto);
+  }
+
+  @Patch(":id/items/quantity")
+  updateItemQuantity(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param("id") id: string,
+    @Body() dto: UpdateItemQuantityDto,
+  ) {
+    return this.lists.updateItemQuantity(id, user.id, dto);
   }
 
   @Delete(":id/items/:itemId")

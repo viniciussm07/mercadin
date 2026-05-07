@@ -13,5 +13,9 @@ export const endpoints = {
   },
   shoppingLists: {
     root: "shopping-lists",
+    detail: (id: string) => `shopping-lists/${id}`,
+    addItemToLists: "shopping-lists/items/bulk",
+    updateItemQuantity: (id: string) => `shopping-lists/${id}/items/quantity`,
+    removeItem: (id: string, itemId: string) => `shopping-lists/${id}/items/${itemId}`,
   },
 } as const;

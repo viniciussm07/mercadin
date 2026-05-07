@@ -1,9 +1,9 @@
-import { Button } from "@components/button";
 import { Card, CardContent, CardHeader } from "@components/card";
 import { Icon } from "@components/icon";
 import { Text } from "@components/text";
 import { ProductGroup } from "@services/products/types";
 import { Image, View } from "react-native";
+import { AddToListsBottomSheet } from "./components/add-to-lists-bottom-sheet";
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -82,11 +82,8 @@ export const ProductGroupCard = ({ group }: { group: ProductGroup }) => {
               <Text className="text-xl font-bold text-primary">
                 {formatPrice(offer.currentPrice)}
               </Text>
-              <Button variant="outline" disabled className="h-8 px-3">
-                <Icon name="Plus" size={14} className="text-muted-foreground" />
-                <Text className="font-questrial text-xs text-muted-foreground">Adicionar</Text>
-              </Button>
             </View>
+            <AddToListsBottomSheet product={offer} />
           </View>
         ))}
       </CardContent>
