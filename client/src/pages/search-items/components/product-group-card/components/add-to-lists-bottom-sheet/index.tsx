@@ -8,6 +8,7 @@ import {
   BottomSheetTrigger,
 } from "@components/bottom-sheet";
 import { Button } from "@components/button";
+import { CreateShoppingListDialog } from "@components/create-shopping-list-dialog";
 import { Icon } from "@components/icon";
 import { QuantityCounter } from "@components/quantity-counter";
 import { Text } from "@components/text";
@@ -39,6 +40,7 @@ export const AddToListsBottomSheet = ({ product }: AddToListsBottomSheetProps) =
     setSearchQuery,
     shoppingLists,
     submitError,
+    selectCreatedList,
     toggleList,
   } = useAddToListsBottomSheet(product.id);
 
@@ -62,6 +64,16 @@ export const AddToListsBottomSheet = ({ product }: AddToListsBottomSheetProps) =
         {submitError ? (
           <Text className="font-questrial text-sm text-destructive">{submitError}</Text>
         ) : null}
+
+        <CreateShoppingListDialog
+          description="Crie uma lista e selecione-a para salvar este produto."
+          onCreated={selectCreatedList}
+          title="Criar nova lista"
+          triggerClassName="w-full"
+          triggerLabel="Criar nova lista"
+          triggerSize="default"
+          triggerVariant="outline"
+        />
 
         {lists.length > 0 ? (
           <ListSearchInput disabled={isSaving} query={searchQuery} onChangeQuery={setSearchQuery} />

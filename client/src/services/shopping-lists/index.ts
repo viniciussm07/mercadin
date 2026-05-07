@@ -28,5 +28,7 @@ export const shoppingListsService = {
     apiClient
       .patch(endpoints.shoppingLists.updateItemQuantity(id), { json: payload })
       .json<ShoppingListItem>(),
+  removeItem: (id: string, itemId: string) =>
+    apiClient.delete(endpoints.shoppingLists.removeItem(id, itemId)).json<ShoppingListItem>(),
   remove: (id: string) => apiClient.delete(endpoints.shoppingLists.detail(id)).json<ShoppingList>(),
 };

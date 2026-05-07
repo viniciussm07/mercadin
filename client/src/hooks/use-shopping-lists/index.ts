@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { shoppingListsService } from "@services/shopping-lists";
+import { showToast } from "@utils/toast";
 import {
   AddItemToShoppingListsPayload,
   CreateShoppingListPayload,
@@ -33,6 +34,7 @@ export const useCreateShoppingList = () => {
   return useMutation({
     mutationFn: (payload: CreateShoppingListPayload) => shoppingListsService.create(payload),
     onSuccess: async () => {
+      showToast({ title: "Lista criada" });
       await queryClient.invalidateQueries({ queryKey: shoppingListsQueryKeys.all });
     },
   });
@@ -59,6 +61,7 @@ export const useAddItemToShoppingLists = () => {
     mutationFn: (payload: AddItemToShoppingListsPayload) =>
       shoppingListsService.addItemToLists(payload),
     onSuccess: async (_, payload) => {
+      showToast({ title: "Produto adicionado" });
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: shoppingListsQueryKeys.all }),
         ...payload.listIds.map(listId =>
@@ -84,12 +87,27 @@ export const useUpdateShoppingListItemQuantity = (id: string) => {
   });
 };
 
+export const useRemoveShoppingListItem = (id: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (itemId: string) => shoppingListsService.removeItem(id, itemId),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: shoppingListsQueryKeys.all }),
+        queryClient.invalidateQueries({ queryKey: shoppingListsQueryKeys.detail(id) }),
+      ]);
+    },
+  });
+};
+
 export const useRemoveShoppingList = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (id: string) => shoppingListsService.remove(id),
     onSuccess: async (_, id) => {
+      showToast({ title: "Lista excluída" });
       queryClient.removeQueries({ queryKey: shoppingListsQueryKeys.detail(id) });
       await queryClient.invalidateQueries({ queryKey: shoppingListsQueryKeys.all });
     },

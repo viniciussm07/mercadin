@@ -1,7 +1,9 @@
+import { normalizeSearchText } from "./normalize-search-text";
+
 type Rankable = { nameInMarket: string; currentPrice: number; masterProductId: string | null };
 
 export function rankResults<T extends Rankable>(query: string, products: T[]): T[] {
-  const q = query.toLowerCase().trim();
+  const q = normalizeSearchText(query);
   const qTokens = q.split(/\s+/).filter(Boolean);
 
   const primoCount = new Map<string, number>();
@@ -25,7 +27,7 @@ export function rankResults<T extends Rankable>(query: string, products: T[]): T
 }
 
 function textScore(q: string, qTokens: string[], p: { nameInMarket: string }): number {
-  const name = p.nameInMarket.toLowerCase();
+  const name = normalizeSearchText(p.nameInMarket);
   if (name === q) return 1000;
 
   const nTokens = name.split(/\s+/).filter(Boolean);

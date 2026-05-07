@@ -8,6 +8,7 @@ import { SessionProvider } from "@contexts/session";
 import { PortalHost } from "@rn-primitives/portal";
 import { KeyboardProvider } from "@contexts/keyboard";
 import { LoadFontsProvider } from "@contexts/fonts";
+import Toast from "react-native-toast-message";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ export const App = () => {
                 <Routes />
                 <StatusBar style="light" />
                 <PortalHost />
+                <Toast />
               </LoadFontsProvider>
             </KeyboardProvider>
           </SessionProvider>

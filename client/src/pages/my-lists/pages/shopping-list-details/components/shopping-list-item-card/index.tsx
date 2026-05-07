@@ -19,10 +19,15 @@ type ShoppingListItemCardProps = {
 };
 
 export const ShoppingListItemCard = ({ item, listId }: ShoppingListItemCardProps) => {
-  const { decreaseQuantity, increaseQuantity, quantity, quantityError } = useShoppingListItemCard({
-    item,
-    listId,
-  });
+  const {
+    decreaseQuantity,
+    increaseQuantity,
+    isRemovingItem,
+    isUpdatingQuantity,
+    quantity,
+    quantityError,
+    removeListItem,
+  } = useShoppingListItemCard({ item, listId });
   const product = item.marketProduct;
   const imageUrl = product?.masterProduct.imageUrl?.trim();
   const productName = product?.masterProduct.name ?? "Produto indisponível";
@@ -71,6 +76,13 @@ export const ShoppingListItemCard = ({ item, listId }: ShoppingListItemCardProps
           quantity={quantity}
           onDecrease={decreaseQuantity}
           onIncrease={increaseQuantity}
+          minimumAction={{
+            accessibilityLabel: "Remover item da lista",
+            disabled: isRemovingItem || isUpdatingQuantity,
+            iconName: "Trash2",
+            onPress: removeListItem,
+            variant: "destructive",
+          }}
         />
         {quantityError ? (
           <Text className="font-questrial text-sm text-destructive">{quantityError}</Text>

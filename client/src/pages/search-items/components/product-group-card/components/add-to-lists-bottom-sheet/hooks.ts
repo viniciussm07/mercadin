@@ -62,6 +62,12 @@ export const useAddToListsBottomSheet = (marketProductId: string) => {
     );
   };
 
+  const selectCreatedList = (list: ShoppingList) => {
+    setSubmitError(null);
+    setSearchQuery("");
+    setSelectedListIds(current => (current.includes(list.id) ? current : [...current, list.id]));
+  };
+
   const decreaseQuantity = () => {
     setQuantity(current => Math.max(1, current - 1));
   };
@@ -107,6 +113,7 @@ export const useAddToListsBottomSheet = (marketProductId: string) => {
     setSearchQuery,
     shoppingLists,
     submitError,
+    selectCreatedList,
     toggleList,
   };
 };

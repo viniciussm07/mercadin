@@ -1,5 +1,7 @@
 import { Injectable } from "@nestjs/common";
+import { Prisma } from "@prisma/client";
 import { PrismaService } from "@/database/prisma.service";
+import { normalizeSearchText } from "../utils/normalize-search-text";
 
 export const QUERY_TTL_MS = 6 * 60 * 60 * 1000; // 6h
 const ALL_MARKETS_CACHE_SCOPE = "ALL";
@@ -10,20 +12,48 @@ const getCacheMarketSlug = (marketSlug: string | null) => marketSlug ?? ALL_MARK
 export class ProductsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  findByQuery(params: { q: string; marketSlugs?: string[]; ttlMs?: number }) {
-    const { q, marketSlugs, ttlMs = QUERY_TTL_MS } = params;
+  async findByQuery(params: { normalizedQuery: string; marketSlugs?: string[]; ttlMs?: number }) {
+    const { normalizedQuery, marketSlugs, ttlMs = QUERY_TTL_MS } = params;
     const threshold = new Date(Date.now() - ttlMs);
+    const q = normalizeSearchText(normalizedQuery);
+    if (!q) {
+      return [];
+    }
 
-    return this.prisma.marketProduct.findMany({
-      where: {
-        isAvailable: true,
-        lastScrapedAt: { gte: threshold },
-        nameInMarket: { contains: q, mode: "insensitive" },
-        ...(marketSlugs && marketSlugs.length > 0 ? { market: { slug: { in: marketSlugs } } } : {}),
-      },
+    const marketFilter =
+      marketSlugs && marketSlugs.length > 0
+        ? Prisma.sql`AND m."slug" IN (${Prisma.join(marketSlugs)})`
+        : Prisma.empty;
+    const rows = await this.prisma.$queryRaw<{ id: string }[]>(Prisma.sql`
+      SELECT mp."id"
+      FROM "MarketProduct" mp
+      INNER JOIN "Market" m ON m."id" = mp."marketId"
+      WHERE mp."isAvailable" = true
+        AND mp."lastScrapedAt" >= ${threshold}
+        AND unaccent(lower(mp."nameInMarket")) LIKE ${`%${q}%`}
+        ${marketFilter}
+      ORDER BY mp."lastScrapedAt" DESC
+      LIMIT 200
+    `);
+    const ids = rows.map(row => row.id);
+    if (ids.length === 0) {
+      return [];
+    }
+
+    const products = await this.prisma.marketProduct.findMany({
+      where: { id: { in: ids } },
       include: { market: true, masterProduct: true },
-      take: 200,
     });
+    const productById = new Map(products.map(product => [product.id, product]));
+    const orderedProducts: typeof products = [];
+    for (const id of ids) {
+      const product = productById.get(id);
+      if (product) {
+        orderedProducts.push(product);
+      }
+    }
+
+    return orderedProducts;
   }
 
   async isQueryFresh(

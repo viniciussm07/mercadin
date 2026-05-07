@@ -3,6 +3,7 @@ import { ProductsRepository } from "../repositories/products.repository";
 import { ProductIngestService } from "./product-ingest.service";
 import { ScrapingOrchestratorService } from "@/modules/scraping/scraping-orchestrator.service";
 import { rankResults } from "../utils/rank-results";
+import { normalizeSearchText } from "../utils/normalize-search-text";
 import { ProductSearchGroup, ProductsSearchResponse } from "./types";
 
 const SEARCH_QUERY_MIN_LENGTH = 2;
@@ -21,7 +22,7 @@ export class ProductsService {
       throw new BadRequestException("Search query must have at least 2 characters.");
     }
 
-    const normalizedQuery = trimmedQuery.toLowerCase();
+    const normalizedQuery = normalizeSearchText(trimmedQuery);
     const selectedMarketSlugs =
       marketSlugs && marketSlugs.length > 0 ? [...new Set(marketSlugs)] : undefined;
 
@@ -30,7 +31,7 @@ export class ProductsService {
       if (fresh) {
         return {
           source: "cache" as const,
-          items: await this.findGroupedSearchResults(normalizedQuery, trimmedQuery),
+          items: await this.findGroupedSearchResults(normalizedQuery),
         };
       }
 
@@ -47,7 +48,7 @@ export class ProductsService {
 
       return {
         source: batches.length > 0 ? ("scrape" as const) : ("cache" as const),
-        items: await this.findGroupedSearchResults(normalizedQuery, trimmedQuery),
+        items: await this.findGroupedSearchResults(normalizedQuery),
       };
     }
 
@@ -74,20 +75,15 @@ export class ProductsService {
 
     return {
       source,
-      items: await this.findGroupedSearchResults(
-        normalizedQuery,
-        trimmedQuery,
-        selectedMarketSlugs,
-      ),
+      items: await this.findGroupedSearchResults(normalizedQuery, selectedMarketSlugs),
     };
   }
 
   private async findGroupedSearchResults(
     normalizedQuery: string,
-    query: string,
     marketSlugs?: string[],
   ): Promise<ProductSearchGroup[]> {
-    const products = await this.repo.findByQuery({ q: query, marketSlugs });
+    const products = await this.repo.findByQuery({ normalizedQuery, marketSlugs });
     const rankedProducts = rankResults(normalizedQuery, products);
     const groups = new Map<string, ProductSearchGroup>();
 

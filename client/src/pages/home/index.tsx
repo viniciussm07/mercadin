@@ -1,8 +1,8 @@
+import { CreateShoppingListDialog } from "@components/create-shopping-list-dialog";
 import { ScrollView, View } from "react-native";
 import { Text } from "@components/text";
 import { cn } from "@utils/cn";
 import { ActiveListsSection } from "./components/active-lists-section";
-import { CreateShoppingListDialog } from "./components/create-shopping-list-dialog";
 import { MetricCard } from "./components/metric-card";
 import { TrendingProductsSection } from "./components/trending-products-section";
 import { mobileContentContainerStyle, wideContentContainerStyle } from "./constants";
@@ -27,7 +27,7 @@ export const Home = () => {
                 Aqui está o seu resumo inteligente de compras.
               </Text>
             </View>
-            <CreateShoppingListDialog />
+            <CreateShoppingListDialog navigateToDetails />
           </View>
 
           <MetricCard />

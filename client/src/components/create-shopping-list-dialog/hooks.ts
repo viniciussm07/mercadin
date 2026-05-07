@@ -2,14 +2,28 @@ import { useMercadinNavigation } from "@hooks/use-navigation";
 import { useCreateShoppingList } from "@hooks/use-shopping-lists";
 import { AuthenticatedNavigation, AuthenticatedStackRouteNames } from "@routes/types";
 import { getHttpErrorMessage } from "@services/http";
+import { ShoppingList } from "@services/shopping-lists/types";
 import { useState } from "react";
 
-export const useCreateShoppingListDialog = () => {
+type UseCreateShoppingListDialogParams = {
+  navigateToDetails?: boolean;
+  onCreated?: (list: ShoppingList) => void;
+};
+
+export const useCreateShoppingListDialog = ({
+  navigateToDetails,
+  onCreated,
+}: UseCreateShoppingListDialogParams) => {
   const navigation = useMercadinNavigation<AuthenticatedNavigation>();
   const createShoppingList = useCreateShoppingList();
   const [name, setName] = useState("");
   const [createError, setCreateError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
+
+  const reset = () => {
+    setName("");
+    setCreateError(null);
+  };
 
   const createList = async () => {
     const trimmedName = name.trim();
@@ -21,22 +35,26 @@ export const useCreateShoppingListDialog = () => {
 
     try {
       const list = await createShoppingList.mutateAsync({ name: trimmedName });
-      setName("");
-      navigation.navigate(AuthenticatedStackRouteNames.SHOPPING_LIST_DETAILS, { listId: list.id });
+      reset();
+      onCreated?.(list);
       setOpen(false);
+
+      if (navigateToDetails) {
+        navigation.navigate(AuthenticatedStackRouteNames.SHOPPING_LIST_DETAILS, {
+          listId: list.id,
+        });
+      }
     } catch (error) {
       setCreateError(await getHttpErrorMessage(error, "Não foi possível criar a lista."));
     }
   };
 
-  const onOpenChange = () => {
-    if (open) {
-      setName("");
-      setCreateError(null);
-      setOpen(false);
-      return;
+  const onOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      reset();
     }
-    setOpen(true);
+
+    setOpen(nextOpen);
   };
 
   return {

@@ -1,7 +1,11 @@
-import { useUpdateShoppingListItemQuantity } from "@hooks/use-shopping-lists";
+import {
+  useRemoveShoppingListItem,
+  useUpdateShoppingListItemQuantity,
+} from "@hooks/use-shopping-lists";
 import { getHttpErrorMessage } from "@services/http";
 import { ShoppingListItem } from "@services/shopping-lists/types";
-import { useEffect, useState } from "react";
+import { showToast } from "@utils/toast";
+import { useEffect, useRef, useState } from "react";
 
 const UPDATE_QUANTITY_DEBOUNCE_MS = 500;
 
@@ -12,8 +16,10 @@ type UseShoppingListItemCardParams = {
 
 export const useShoppingListItemCard = ({ item, listId }: UseShoppingListItemCardParams) => {
   const { isPending, mutate } = useUpdateShoppingListItemQuantity(listId);
+  const removeItem = useRemoveShoppingListItem(listId);
   const [quantity, setQuantity] = useState(item.quantity);
   const [quantityError, setQuantityError] = useState<string | null>(null);
+  const updateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     setQuantity(item.quantity);
@@ -24,7 +30,7 @@ export const useShoppingListItemCard = ({ item, listId }: UseShoppingListItemCar
       return;
     }
 
-    const timeout = setTimeout(() => {
+    updateTimeoutRef.current = setTimeout(() => {
       mutate(
         {
           marketProductId: item.marketProductId,
@@ -44,7 +50,12 @@ export const useShoppingListItemCard = ({ item, listId }: UseShoppingListItemCar
       );
     }, UPDATE_QUANTITY_DEBOUNCE_MS);
 
-    return () => clearTimeout(timeout);
+    return () => {
+      if (updateTimeoutRef.current) {
+        clearTimeout(updateTimeoutRef.current);
+        updateTimeoutRef.current = null;
+      }
+    };
   }, [item.marketProductId, item.quantity, mutate, quantity]);
 
   const decreaseQuantity = () => {
@@ -57,11 +68,31 @@ export const useShoppingListItemCard = ({ item, listId }: UseShoppingListItemCar
     setQuantity(current => current + 1);
   };
 
+  const removeListItem = async () => {
+    if (updateTimeoutRef.current) {
+      clearTimeout(updateTimeoutRef.current);
+      updateTimeoutRef.current = null;
+    }
+
+    setQuantityError(null);
+
+    try {
+      await removeItem.mutateAsync(item.id);
+      showToast({ title: "Item removido" });
+    } catch (error) {
+      const message = await getHttpErrorMessage(error, "Não foi possível remover o item.");
+      setQuantityError(message);
+      showToast({ title: "Não foi possível remover o item", message, type: "error" });
+    }
+  };
+
   return {
     decreaseQuantity,
     increaseQuantity,
+    isRemovingItem: removeItem.isPending,
     isUpdatingQuantity: isPending,
     quantity,
     quantityError,
+    removeListItem,
   };
 };

@@ -9,6 +9,13 @@ type QuantityCounterProps = {
   quantity: number;
   disabled?: boolean;
   description?: string;
+  minimumAction?: {
+    accessibilityLabel: string;
+    disabled?: boolean;
+    iconName: "Trash2";
+    onPress: () => void;
+    variant?: "destructive" | "outline";
+  };
 };
 
 export const QuantityCounter = ({
@@ -17,8 +24,16 @@ export const QuantityCounter = ({
   onIncrease,
   quantity,
   description,
+  minimumAction,
 }: QuantityCounterProps) => {
   const canDecrease = quantity > 1 && !disabled;
+  const showMinimumAction = quantity <= 1 && minimumAction;
+  const decreaseDisabled = showMinimumAction ? disabled || minimumAction.disabled : !canDecrease;
+  const decreaseIconName = showMinimumAction ? minimumAction.iconName : "Minus";
+  const decreaseVariant = showMinimumAction ? (minimumAction.variant ?? "outline") : "outline";
+  const decreaseIconClassName =
+    decreaseVariant === "destructive" ? "text-white" : "text-foreground";
+  const onDecreasePress = showMinimumAction ? minimumAction.onPress : onDecrease;
 
   return (
     <View className="flex-row items-center justify-between gap-3 rounded-lg border border-border bg-white p-3">
@@ -32,12 +47,13 @@ export const QuantityCounter = ({
       <View className="flex-row items-center gap-3">
         <Button
           size="icon"
-          variant="outline"
-          disabled={!canDecrease}
-          onPress={onDecrease}
+          variant={decreaseVariant}
+          disabled={decreaseDisabled}
+          onPress={onDecreasePress}
           className="size-9"
+          accessibilityLabel={showMinimumAction ? minimumAction.accessibilityLabel : undefined}
         >
-          <Icon name="Minus" size={16} className="text-foreground" />
+          <Icon name={decreaseIconName} size={16} className={decreaseIconClassName} />
         </Button>
         <Text className="min-w-8 text-center text-lg font-bold text-foreground">{quantity}</Text>
         <Button
