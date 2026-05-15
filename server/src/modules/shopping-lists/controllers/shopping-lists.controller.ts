@@ -1,6 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from "@nestjs/common";
 import { ShoppingListsService } from "../services/shopping-lists.service";
-import { PriceCombinationService } from "../services/price-combination.service";
 import { CreateListDto } from "../dtos/create-list.dto";
 import { UpdateListDto } from "../dtos/update-list.dto";
 import { AddItemDto } from "../dtos/add-item.dto";
@@ -10,10 +9,7 @@ import { CurrentUser, AuthenticatedUser } from "@/common/decorators/current-user
 
 @Controller("shopping-lists")
 export class ShoppingListsController {
-  constructor(
-    private readonly lists: ShoppingListsService,
-    private readonly combination: PriceCombinationService,
-  ) {}
+  constructor(private readonly lists: ShoppingListsService) {}
 
   @Get()
   findAll(@CurrentUser() user: AuthenticatedUser) {
@@ -74,10 +70,5 @@ export class ShoppingListsController {
     @Param("itemId") itemId: string,
   ) {
     return this.lists.removeItem(id, itemId, user.id);
-  }
-
-  @Get(":id/combine")
-  combine(@CurrentUser() user: AuthenticatedUser, @Param("id") id: string) {
-    return this.combination.combine(id, user.id);
   }
 }

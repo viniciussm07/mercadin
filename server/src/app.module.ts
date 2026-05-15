@@ -9,6 +9,7 @@ import { MarketsModule } from "./modules/markets/markets.module";
 import { ScrapingModule } from "./modules/scraping/scraping.module";
 import { ProductsModule } from "./modules/products/products.module";
 import { ShoppingListsModule } from "./modules/shopping-lists/shopping-lists.module";
+import { PriceComparisonsModule } from "./modules/price-comparisons/price-comparisons.module";
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ShoppingListsModule } from "./modules/shopping-lists/shopping-lists.mod
     ScrapingModule,
     ProductsModule,
     ShoppingListsModule,
+    PriceComparisonsModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: JwtAuthGuard }],
 })

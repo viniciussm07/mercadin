@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { priceComparisonsQueryKeys } from "@hooks/use-price-comparison";
 import { shoppingListsService } from "@services/shopping-lists";
 import { showToast } from "@utils/toast";
 import {
@@ -67,6 +68,9 @@ export const useAddItemToShoppingLists = () => {
         ...payload.listIds.map(listId =>
           queryClient.invalidateQueries({ queryKey: shoppingListsQueryKeys.detail(listId) }),
         ),
+        ...payload.listIds.map(listId =>
+          queryClient.invalidateQueries({ queryKey: priceComparisonsQueryKeys.list(listId) }),
+        ),
       ]);
     },
   });
@@ -82,6 +86,7 @@ export const useUpdateShoppingListItemQuantity = (id: string) => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: shoppingListsQueryKeys.all }),
         queryClient.invalidateQueries({ queryKey: shoppingListsQueryKeys.detail(id) }),
+        queryClient.invalidateQueries({ queryKey: priceComparisonsQueryKeys.list(id) }),
       ]);
     },
   });
@@ -96,6 +101,7 @@ export const useRemoveShoppingListItem = (id: string) => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: shoppingListsQueryKeys.all }),
         queryClient.invalidateQueries({ queryKey: shoppingListsQueryKeys.detail(id) }),
+        queryClient.invalidateQueries({ queryKey: priceComparisonsQueryKeys.list(id) }),
       ]);
     },
   });
