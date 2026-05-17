@@ -13,6 +13,7 @@ export const endpoints = {
   },
   products: {
     search: "products/search",
+    searchHistory: "products/search-history",
   },
   shoppingLists: {
     root: "shopping-lists",

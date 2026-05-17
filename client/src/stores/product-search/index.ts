@@ -10,14 +10,31 @@ interface ProductSearchStore {
   query: string;
   debouncedQuery: string;
   selectedMarkets: MARKET_SLUGS[];
+  commitQuery: (nextQuery?: string) => void;
   setQuery: (nextQuery: string) => void;
   setSelectedMarkets: (nextMarkets: MARKET_SLUGS[]) => void;
+  clear: () => void;
 }
 
 export const useProductSearchStore = create<ProductSearchStore>(set => ({
   query: "",
   debouncedQuery: "",
   selectedMarkets: [],
+  commitQuery: nextQuery => {
+    if (searchDebounceTimeout) {
+      clearTimeout(searchDebounceTimeout);
+    }
+
+    set(state => {
+      const query = nextQuery ?? state.query;
+      const trimmedQuery = query.trim();
+
+      return {
+        query,
+        debouncedQuery: trimmedQuery,
+      };
+    });
+  },
   setQuery: nextQuery => {
     const trimmedQuery = nextQuery.trim();
 
@@ -37,4 +54,5 @@ export const useProductSearchStore = create<ProductSearchStore>(set => ({
     }, SEARCH_QUERY_DEBOUNCE_MS);
   },
   setSelectedMarkets: nextMarkets => set({ selectedMarkets: nextMarkets }),
+  clear: () => set({ query: "", debouncedQuery: "", selectedMarkets: [] }),
 }));

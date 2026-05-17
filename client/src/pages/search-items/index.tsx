@@ -1,3 +1,4 @@
+import { ProductSearchInput } from "@components/product-search-input";
 import { env } from "@utils/environment";
 import { useMemo } from "react";
 import { ScrollView, View } from "react-native";
@@ -6,7 +7,6 @@ import { EmptyState } from "./components/empty-state";
 import { MarketFilters } from "./components/market-filters";
 import { ProductGroupCard } from "./components/product-group-card";
 import { ProductResultSkeleton } from "./components/product-result-skeleton";
-import { SearchInput } from "./components/search-input";
 import { useSearchProducts } from "./hooks";
 
 const wideContentContainerStyle = { paddingBottom: 120, paddingTop: 56 };
@@ -32,7 +32,7 @@ export const SearchItemsPage = () => {
           style={{ paddingTop: top + 12 }}
         >
           <View className="w-full max-w-4xl self-center">
-            <SearchInput />
+            <ProductSearchInput inputClassName="h-12" />
           </View>
         </View>
       ) : null}
