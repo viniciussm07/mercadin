@@ -25,10 +25,10 @@ export const useSearchProducts = () => {
   });
 
   useEffect(() => {
-    if (!hasValidQuery || !products.isSuccess || products.isFetchedAfterMount) return;
+    if (!hasValidQuery || !products.isSuccess) return;
 
     saveQuery.mutate({ query: debouncedQuery });
-  }, [hasValidQuery, debouncedQuery, saveQuery, products, clearQuery]);
+  }, [hasValidQuery, debouncedQuery, saveQuery, products.isSuccess]);
 
   useFocusEffect(
     useCallback(() => {

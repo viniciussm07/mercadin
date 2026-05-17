@@ -1,6 +1,6 @@
 import { useProductSearchHistory } from "@hooks/use-product-search-history";
 import { useProductSearchStore } from "@stores/product-search";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const BLUR_HIDE_DELAY_MS = 120;
 
@@ -19,6 +19,15 @@ export const useProductSearchInput = ({
   const commitQuery = useProductSearchStore(state => state.commitQuery);
   const history = useProductSearchHistory();
   const [isFocused, setIsFocused] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      if (hideSuggestionsTimeout.current) {
+        clearTimeout(hideSuggestionsTimeout.current);
+        hideSuggestionsTimeout.current = undefined;
+      }
+    };
+  }, []);
 
   const suggestions = useMemo(() => {
     const items = history.data ?? [];
@@ -59,6 +68,7 @@ export const useProductSearchInput = ({
   const onBlur = () => {
     hideSuggestionsTimeout.current = setTimeout(() => {
       setIsFocused(false);
+      hideSuggestionsTimeout.current = undefined;
     }, BLUR_HIDE_DELAY_MS);
   };
 

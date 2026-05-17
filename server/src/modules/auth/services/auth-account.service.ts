@@ -36,6 +36,8 @@ export class AuthAccountService {
 
   async updateEmail(userId: string, dto: UpdateEmailDto) {
     const email = dto.email.trim().toLowerCase();
+    await this.users.assertEmailAvailable(userId, email);
+
     const { data, error } = await this.supabaseAdmin.auth.admin.updateUserById(userId, {
       email,
       email_confirm: true,
@@ -78,13 +80,13 @@ export class AuthAccountService {
   }
 
   async deleteAccount(userId: string) {
-    await this.users.deleteAccount(userId);
-
     const { error } = await this.supabaseAdmin.auth.admin.deleteUser(userId);
 
     if (error) {
       throw new BadRequestException(error.message);
     }
+
+    await this.users.deleteAccount(userId);
 
     return { success: true };
   }
