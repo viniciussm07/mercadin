@@ -7,6 +7,7 @@ import {
   FindShoppingListsParams,
   ShoppingList,
   ShoppingListItem,
+  DeleteShoppingListsResponse,
   UpdateShoppingListItemQuantityPayload,
   UpdateShoppingListPayload,
 } from "./types";
@@ -30,5 +31,7 @@ export const shoppingListsService = {
       .json<ShoppingListItem>(),
   removeItem: (id: string, itemId: string) =>
     apiClient.delete(endpoints.shoppingLists.removeItem(id, itemId)).json<ShoppingListItem>(),
+  removeAll: () =>
+    apiClient.delete(endpoints.shoppingLists.root).json<DeleteShoppingListsResponse>(),
   remove: (id: string) => apiClient.delete(endpoints.shoppingLists.detail(id)).json<ShoppingList>(),
 };

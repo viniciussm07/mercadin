@@ -74,7 +74,7 @@ function DialogContent({
       <DialogOverlay>
         <DialogPrimitive.Content
           className={cn(
-            "bg-background border-border z-50 mx-auto flex w-full max-w-[calc(100%-2rem)] flex-col gap-4 rounded-lg border p-6 shadow-lg shadow-black/5 sm:max-w-lg",
+            "bg-background border-border z-50 mx-auto flex w-[calc(100vw-2rem)] flex-col gap-4 rounded-lg border p-6 shadow-lg shadow-black/5 sm:w-[30rem]",
             Platform.select({
               web: "animate-in fade-in-0 zoom-in-95 duration-200",
             }),
@@ -113,7 +113,7 @@ function DialogHeader({ className, ...props }: ViewProps) {
 function DialogFooter({ className, ...props }: ViewProps) {
   return (
     <View
-      className={cn("flex flex-col-reverse gap-2 sm:flex-row sm:justify-end", className)}
+      className={cn("flex flex-col-reverse gap-2 sm:flex-row sm:justify-between", className)}
       {...props}
     />
   );

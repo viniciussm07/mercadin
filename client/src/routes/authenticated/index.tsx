@@ -5,6 +5,7 @@ import { MyLists } from "@pages/my-lists";
 import { Promotions } from "@pages/promotions";
 import { SearchItemsPage } from "@pages/search-items";
 import { ShoppingListDetails } from "@pages/my-lists/pages/shopping-list-details";
+import { UserSettings } from "@pages/user-settings";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import {
@@ -60,6 +61,7 @@ export const AuthenticatedRoutes = () => {
         name={AuthenticatedStackRouteNames.SHOPPING_LIST_DETAILS}
         component={ShoppingListDetails}
       />
+      <Stack.Screen name={AuthenticatedStackRouteNames.USER_SETTINGS} component={UserSettings} />
     </Stack.Navigator>
   );
 };

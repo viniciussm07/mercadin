@@ -36,6 +36,10 @@ export interface UpdateShoppingListPayload {
   name?: string;
 }
 
+export interface DeleteShoppingListsResponse {
+  count: number;
+}
+
 export interface AddItemToShoppingListsPayload {
   listIds: string[];
   marketProductId: string;

@@ -15,6 +15,17 @@ export class UsersRepository {
     return this.prisma.user.update({ where: { id }, data });
   }
 
+  updateEmail(id: string, email: string) {
+    return this.prisma.user.update({ where: { id }, data: { email } });
+  }
+
+  deleteAccount(id: string) {
+    return this.prisma.$transaction(async tx => {
+      await tx.shoppingList.deleteMany({ where: { userId: id } });
+      await tx.user.delete({ where: { id } });
+    });
+  }
+
   upsert(data: Prisma.UserCreateInput) {
     return this.prisma.user.upsert({
       where: { id: data.id },

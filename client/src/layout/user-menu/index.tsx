@@ -9,9 +9,12 @@ import {
 import { Icon } from "@components/icon";
 import { Text } from "@components/text";
 import { useSession } from "@contexts/session";
+import { useMercadinNavigation } from "@hooks/use-navigation";
+import { AuthenticatedNavigation, AuthenticatedStackRouteNames } from "@routes/types";
 import { Image, View } from "react-native";
 
 export const UserMenu = () => {
+  const navigation = useMercadinNavigation<AuthenticatedNavigation>();
   const {
     session: { signOut, user },
   } = useSession();
@@ -39,6 +42,17 @@ export const UserMenu = () => {
             {displayName}
           </Text>
         </DropdownMenuLabel>
+
+        <DropdownMenuSeparator />
+
+        <DropdownMenuItem
+          onPress={() => navigation.navigate(AuthenticatedStackRouteNames.USER_SETTINGS)}
+        >
+          <View className="flex-row items-center gap-2">
+            <Icon name="Settings" size={16} className="text-popover-foreground" />
+            <Text className="font-questrial text-sm">Configurações</Text>
+          </View>
+        </DropdownMenuItem>
 
         <DropdownMenuSeparator />
 

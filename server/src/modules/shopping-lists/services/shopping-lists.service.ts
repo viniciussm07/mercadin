@@ -34,6 +34,10 @@ export class ShoppingListsService {
     return this.repo.delete(id);
   }
 
+  removeAll(userId: string) {
+    return this.repo.deleteAllByUser(userId);
+  }
+
   async addItem(listId: string, userId: string, dto: AddItemDto) {
     await this.assertOwnership(listId, userId);
     return this.repo.addItem(listId, dto.marketProductId, dto.quantity);

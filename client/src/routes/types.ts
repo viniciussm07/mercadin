@@ -22,6 +22,7 @@ export enum AuthenticatedRouteNames {
 export enum AuthenticatedStackRouteNames {
   TABS = "AuthenticatedTabs",
   SHOPPING_LIST_DETAILS = "ShoppingListDetails",
+  USER_SETTINGS = "UserSettings",
 }
 
 export type UnauthenticatedTabParamList = {
@@ -39,6 +40,7 @@ export type AuthenticatedTabParamList = {
 export type AuthenticatedStackParamList = {
   [AuthenticatedStackRouteNames.TABS]: NavigatorScreenParams<AuthenticatedTabParamList>;
   [AuthenticatedStackRouteNames.SHOPPING_LIST_DETAILS]: { listId: string };
+  [AuthenticatedStackRouteNames.USER_SETTINGS]: undefined;
 };
 
 export type RootStackParamList = {

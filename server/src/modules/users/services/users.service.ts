@@ -23,6 +23,14 @@ export class UsersService {
     return this.users.updateProfile(id, dto);
   }
 
+  updateEmail(id: string, email: string) {
+    return this.users.updateEmail(id, email);
+  }
+
+  deleteAccount(id: string) {
+    return this.users.deleteAccount(id);
+  }
+
   syncUser(data: SyncUserData) {
     return this.users.upsert({
       id: data.id,

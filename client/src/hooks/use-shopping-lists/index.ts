@@ -113,3 +113,22 @@ export const useRemoveShoppingList = () => {
     },
   });
 };
+
+export const useRemoveAllShoppingLists = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: shoppingListsService.removeAll,
+    onSuccess: async response => {
+      showToast({
+        title: "Dados limpos",
+        message:
+          response.count === 1
+            ? "1 lista foi removida."
+            : `${response.count} listas foram removidas.`,
+      });
+      queryClient.removeQueries({ queryKey: shoppingListsQueryKeys.all });
+      await queryClient.invalidateQueries({ queryKey: shoppingListsQueryKeys.all });
+    },
+  });
+};

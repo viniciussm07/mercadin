@@ -1,9 +1,12 @@
 export const endpoints = {
   auth: {
+    deleteMe: "auth/me",
     signIn: "auth/sign-in",
     signUp: "auth/sign-up",
     signInWithToken: "auth/sign-in-with-token",
     syncSession: "auth/sync-session",
+    updateEmail: "auth/me/email",
+    updatePassword: "auth/me/password",
   },
   users: {
     me: "users/me",
