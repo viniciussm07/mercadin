@@ -3,7 +3,7 @@ import { Icon } from "@components/icon";
 import { Text } from "@components/text";
 import { ByMarketCart, PriceComparison } from "@services/price-comparisons/types";
 import { View } from "react-native";
-import { formatCurrency, marketCountLabel } from "../../utils";
+import { formatCurrency } from "../../utils";
 
 interface ComparisonSummaryCardProps {
   cheapestSingleMarket: ByMarketCart | null;
@@ -69,7 +69,7 @@ export const ComparisonSummaryCard = ({
           <View className="min-w-0 flex-1 gap-1">
             <Text className="text-xl font-bold text-foreground">Comparação de economia</Text>
             <Text className="font-questrial text-sm text-muted-foreground">
-              Compare comprar tudo em um mercado com dividir pelos menores preços.
+              Compare comprar tudo em um mercado com menores preços em cada mercado.
             </Text>
           </View>
         </View>
@@ -89,10 +89,6 @@ export const ComparisonSummaryCard = ({
             tone="primary"
           />
         </View>
-
-        <Text className="font-questrial text-sm text-muted-foreground">
-          A opção por menores preços usa {marketCountLabel(comparison.superCart.marketsCount)}.
-        </Text>
       </CardContent>
     </Card>
   );

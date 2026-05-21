@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { usePriceComparison } from "@hooks/use-price-comparison";
 
 export type PriceComparisonTab = "summary" | "same-market" | "best-prices";
@@ -9,6 +9,7 @@ interface UsePriceComparisonPanelParams {
 }
 
 export const usePriceComparisonPanel = ({ itemCount, listId }: UsePriceComparisonPanelParams) => {
+  const [activeTab, setActiveTab] = useState<PriceComparisonTab>("best-prices");
   const hasItems = itemCount > 0;
   const comparison = usePriceComparison(listId, hasItems);
 
@@ -26,28 +27,29 @@ export const usePriceComparisonPanel = ({ itemCount, listId }: UsePriceCompariso
     [comparison.data?.byMarket],
   );
 
+  const completeMarketAlternatives = useMemo(() => {
+    return (
+      comparison.data?.byMarket
+        .filter(cart => cart.isComplete && cart.marketId !== cheapestSingleMarket?.marketId)
+        .sort((first, second) => first.total - second.total) ?? []
+    );
+  }, [cheapestSingleMarket?.marketId, comparison.data?.byMarket]);
+
   const hasSavings = typeof comparison.data?.savings === "number" && comparison.data.savings > 0;
-  const [activeTab, setActiveTab] = useState<PriceComparisonTab>("summary");
 
   const availableTabs = useMemo(() => {
-    const tabs: PriceComparisonTab[] = ["summary"];
-    if (cheapestSingleMarket) {
-      tabs.push("same-market");
-    }
+    const tabs: PriceComparisonTab[] = [];
     tabs.push("best-prices");
+    if (cheapestSingleMarket) tabs.push("same-market");
+    tabs.push("summary");
     return tabs;
   }, [cheapestSingleMarket]);
-
-  useEffect(() => {
-    if (!availableTabs.includes(activeTab)) {
-      setActiveTab("summary");
-    }
-  }, [activeTab, availableTabs]);
 
   return {
     activeTab,
     availableTabs,
     cheapestSingleMarket,
+    completeMarketAlternatives,
     comparison,
     hasItems,
     hasSavings,

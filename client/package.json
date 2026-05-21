@@ -21,6 +21,7 @@
     "@rn-primitives/dropdown-menu": "^1.4.0",
     "@rn-primitives/portal": "^1.4.0",
     "@rn-primitives/slot": "^1.4.0",
+    "@rn-primitives/tabs": "^1.4.0",
     "@rn-primitives/toggle": "^1.4.0",
     "@rn-primitives/toggle-group": "^1.4.0",
     "@supabase/supabase-js": "^2.104.0",

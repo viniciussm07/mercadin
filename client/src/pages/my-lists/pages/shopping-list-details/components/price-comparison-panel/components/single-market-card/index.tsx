@@ -7,6 +7,7 @@ import { formatCurrency, formatMissingPreview, itemCountLabel } from "../../util
 
 interface SingleMarketCardProps {
   cheapestSingleMarket: ByMarketCart;
+  completeMarketAlternatives: ByMarketCart[];
   incompleteMarkets: ByMarketCart[];
 }
 
@@ -36,6 +37,7 @@ const MarketRow = ({ cart }: { cart: ByMarketCart }) => (
 
 export const SingleMarketCard = ({
   cheapestSingleMarket,
+  completeMarketAlternatives,
   incompleteMarkets,
 }: SingleMarketCardProps) => (
   <Card className="border-0 bg-white py-5 shadow-sm">
@@ -47,7 +49,7 @@ export const SingleMarketCard = ({
         <View className="min-w-0 flex-1">
           <Text className="text-lg font-bold text-foreground">Tudo em um mercado</Text>
           <Text className="font-questrial text-sm text-muted-foreground">
-            Compra completa sem dividir a lista.
+            Compra completa em um único mercado.
           </Text>
         </View>
       </View>
@@ -56,6 +58,17 @@ export const SingleMarketCard = ({
         <Text className="font-questrial text-xs uppercase text-primary">Melhor opção</Text>
         <MarketRow cart={cheapestSingleMarket} />
       </View>
+
+      {completeMarketAlternatives.length > 0 ? (
+        <View className="gap-2">
+          <Text className="font-questrial text-xs uppercase text-muted-foreground">
+            Outras opções completas
+          </Text>
+          {completeMarketAlternatives.map(cart => (
+            <MarketRow key={cart.marketId} cart={cart} />
+          ))}
+        </View>
+      ) : null}
 
       {incompleteMarkets.length > 0 ? (
         <View className="gap-2">

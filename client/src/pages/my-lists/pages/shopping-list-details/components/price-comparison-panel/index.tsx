@@ -1,11 +1,11 @@
 import { Button } from "@components/button";
-import { Card, CardContent } from "@components/card";
 import { Icon } from "@components/icon";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@components/tabs";
 import { Text } from "@components/text";
-import { ToggleGroup, ToggleGroupIcon, ToggleGroupItem } from "@components/toggle-group";
 import { View } from "react-native";
 import { ComparisonSummaryCard } from "./components/comparison-summary-card";
 import { SingleMarketCard } from "./components/single-market-card";
+import { StateCard } from "./components/state-card";
 import { SuperMarketCard } from "./components/super-market-card";
 import { PriceComparisonTab, usePriceComparisonPanel } from "./hooks";
 
@@ -13,33 +13,6 @@ interface PriceComparisonPanelProps {
   itemCount: number;
   listId: string;
 }
-
-const StateCard = ({
-  action,
-  description,
-  iconName,
-  title,
-}: {
-  action?: React.ReactNode;
-  description: string;
-  iconName: React.ComponentProps<typeof Icon>["name"];
-  title: string;
-}) => (
-  <Card className="border-0 bg-white py-5 shadow-sm">
-    <CardContent className="gap-3">
-      <View className="flex-row items-start gap-3">
-        <View className="size-10 items-center justify-center rounded-full bg-primary/10">
-          <Icon name={iconName} size={18} className="text-primary" />
-        </View>
-        <View className="min-w-0 flex-1 gap-1">
-          <Text className="text-xl font-bold text-foreground">{title}</Text>
-          <Text className="font-questrial text-sm text-muted-foreground">{description}</Text>
-        </View>
-      </View>
-      {action}
-    </CardContent>
-  </Card>
-);
 
 const tabLabels: Record<
   PriceComparisonTab,
@@ -55,6 +28,7 @@ export const PriceComparisonPanel = ({ itemCount, listId }: PriceComparisonPanel
     activeTab,
     availableTabs,
     cheapestSingleMarket,
+    completeMarketAlternatives,
     comparison,
     hasItems,
     hasSavings,
@@ -99,49 +73,51 @@ export const PriceComparisonPanel = ({ itemCount, listId }: PriceComparisonPanel
     );
   }
 
-  return (
-    <View className="gap-3">
-      <ToggleGroup
-        type="single"
-        value={activeTab}
-        onValueChange={nextTab => {
-          if (nextTab) {
-            setActiveTab(nextTab as PriceComparisonTab);
-          }
-        }}
-        variant="outline"
-        className="w-full flex-wrap items-stretch"
-      >
-        {availableTabs.map((tab, index) => (
-          <ToggleGroupItem
-            key={tab}
-            value={tab}
-            isFirst={index === 0}
-            isLast={index === availableTabs.length - 1}
-            className="flex-1 px-2"
-          >
-            <ToggleGroupIcon name={tabLabels[tab].icon} size={14} />
-            <Text className="font-questrial text-xs">{tabLabels[tab].label}</Text>
-          </ToggleGroupItem>
-        ))}
-      </ToggleGroup>
+  const handleTabChange = (nextTab: string) => {
+    setActiveTab(nextTab as PriceComparisonTab);
+  };
 
-      {activeTab === "summary" ? (
+  return (
+    <Tabs value={activeTab} onValueChange={handleTabChange} className="gap-3">
+      <TabsList className="h-auto w-full flex-wrap items-stretch">
+        {availableTabs.map(tab => (
+          <TabsTrigger key={tab} value={tab} className="flex-1 px-2">
+            <Icon name={tabLabels[tab].icon} size={14} />
+            <Text className="font-questrial">{tabLabels[tab].label}</Text>
+          </TabsTrigger>
+        ))}
+      </TabsList>
+
+      {comparison.isRefetching ? (
+        <View className="flex-row items-center gap-2 rounded-lg bg-accent px-3 py-2">
+          <Icon name="RefreshCw" size={14} className="text-muted-foreground" />
+          <Text className="font-questrial text-xs text-muted-foreground">
+            Atualizando comparação...
+          </Text>
+        </View>
+      ) : null}
+
+      {cheapestSingleMarket ? (
+        <TabsContent value="same-market">
+          <SingleMarketCard
+            cheapestSingleMarket={cheapestSingleMarket}
+            completeMarketAlternatives={completeMarketAlternatives}
+            incompleteMarkets={incompleteMarkets}
+          />
+        </TabsContent>
+      ) : null}
+
+      <TabsContent value="best-prices">
+        <SuperMarketCard superCart={data.superCart} />
+      </TabsContent>
+
+      <TabsContent value="summary">
         <ComparisonSummaryCard
           cheapestSingleMarket={cheapestSingleMarket}
           comparison={data}
           hasSavings={hasSavings}
         />
-      ) : null}
-
-      {activeTab === "same-market" && cheapestSingleMarket ? (
-        <SingleMarketCard
-          cheapestSingleMarket={cheapestSingleMarket}
-          incompleteMarkets={incompleteMarkets}
-        />
-      ) : null}
-
-      {activeTab === "best-prices" ? <SuperMarketCard superCart={data.superCart} /> : null}
-    </View>
+      </TabsContent>
+    </Tabs>
   );
 };
