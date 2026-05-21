@@ -113,25 +113,4 @@ export class ShoppingListsRepository {
   removeItem(itemId: string) {
     return this.prisma.shoppingListItem.delete({ where: { id: itemId } });
   }
-
-  findItemsWithVariants(listId: string) {
-    return this.prisma.shoppingListItem.findMany({
-      where: { listId },
-      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-      include: {
-        marketProduct: {
-          include: {
-            masterProduct: {
-              include: {
-                variants: {
-                  where: { isAvailable: true },
-                  include: { market: true },
-                },
-              },
-            },
-          },
-        },
-      },
-    });
-  }
 }

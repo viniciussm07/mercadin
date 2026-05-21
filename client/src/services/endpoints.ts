@@ -11,6 +11,9 @@ export const endpoints = {
   products: {
     search: "products/search",
   },
+  priceComparisons: {
+    list: (id: string) => `price-comparisons/lists/${id}`,
+  },
   shoppingLists: {
     root: "shopping-lists",
     detail: (id: string) => `shopping-lists/${id}`,

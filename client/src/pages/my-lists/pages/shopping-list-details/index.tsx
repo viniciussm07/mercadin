@@ -6,6 +6,7 @@ import { Input } from "@components/input";
 import { Text } from "@components/text";
 import { ScrollView, View } from "react-native";
 import { DeleteListCard } from "./components/delete-list-card";
+import { PriceComparisonPanel } from "./components/price-comparison-panel";
 import { ShoppingListItemCard } from "./components/shopping-list-item-card";
 import { useShoppingListDetails } from "./hooks";
 
@@ -130,6 +131,8 @@ export const ShoppingListDetails = () => {
                 </View>
               )}
             </View>
+
+            <PriceComparisonPanel itemCount={items.length} listId={list.id} />
 
             <DeleteListCard
               isDeleting={removeShoppingList.isPending}
