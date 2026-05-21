@@ -15,6 +15,16 @@ export interface SignInWithTokenPayload {
   accessToken?: string;
 }
 
+export interface UpdateEmailPayload {
+  email: string;
+}
+
+export interface UpdatePasswordPayload {
+  currentPassword: string;
+  newPassword: string;
+  newPasswordConfirmation: string;
+}
+
 export interface SignInResponse {
   session?: {
     access_token: string;
@@ -22,4 +32,8 @@ export interface SignInResponse {
     refresh_token?: string;
     token_type?: string;
   } | null;
+}
+
+export interface SuccessResponse {
+  success: boolean;
 }

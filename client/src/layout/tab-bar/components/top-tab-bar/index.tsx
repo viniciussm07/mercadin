@@ -7,10 +7,9 @@ import { cn } from "@utils/cn";
 import { Icon } from "@components/icon";
 import { AuthenticatedRouteNames } from "@routes/types";
 import { env } from "@utils/environment";
-import { Input } from "@components/input";
 import { UserMenu } from "@layout/user-menu";
 import { useSession } from "@contexts/session";
-import { useProductSearchStore } from "@stores/product-search";
+import { ProductSearchInput } from "@components/product-search-input";
 
 interface OnPress {
   key: string;
@@ -36,11 +35,8 @@ export const TopTabBar = ({ state, descriptors, navigation }: BottomTabBarProps)
   const {
     session: { isAuthenticated },
   } = useSession();
-  const query = useProductSearchStore(state => state.query);
-  const setQuery = useProductSearchStore(state => state.setQuery);
 
-  const onChangeSearch = (nextQuery: string) => {
-    setQuery(nextQuery);
+  const onChangeSearch = (_nextQuery: string) => {
     navigation.navigate(AuthenticatedRouteNames.SEARCH_ITEMS);
   };
 
@@ -83,23 +79,13 @@ export const TopTabBar = ({ state, descriptors, navigation }: BottomTabBarProps)
       </View>
 
       {isAuthenticated && (
-        <View className="grid w-full max-w-[400px] flex-1">
-          <Icon
-            name="Search"
-            className="col-[1/1] row-[1/1] z-10 ml-2 self-center text-muted-foreground"
-            size={18}
-          />
-          <Input
-            value={query}
-            placeholder="Procurar..."
-            className={cn(
-              "col-[1/1] row-[1/1] pl-8",
-              state.routes[state.index].name === AuthenticatedRouteNames.SEARCH_ITEMS &&
-                "border-ring ring-ring/50 ring-[3px]",
-            )}
-            onChangeText={onChangeSearch}
-          />
-        </View>
+        <ProductSearchInput
+          active={state.routes[state.index].name === AuthenticatedRouteNames.SEARCH_ITEMS}
+          className="w-full max-w-[400px] flex-1"
+          onChangeQuery={onChangeSearch}
+          onSubmitQuery={onChangeSearch}
+          placeholder="Procurar..."
+        />
       )}
 
       <View className="flex-row justify-end flex-1">

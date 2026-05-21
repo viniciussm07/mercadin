@@ -40,6 +40,11 @@ export class ShoppingListsController {
     return this.lists.remove(id, user.id);
   }
 
+  @Delete()
+  removeAll(@CurrentUser() user: AuthenticatedUser) {
+    return this.lists.removeAll(user.id);
+  }
+
   @Post("items/bulk")
   addItemToLists(@CurrentUser() user: AuthenticatedUser, @Body() dto: AddItemToListsDto) {
     return this.lists.addItemToLists(user.id, dto);

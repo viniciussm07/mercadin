@@ -56,6 +56,10 @@ export class ShoppingListsRepository {
     return this.prisma.shoppingList.delete({ where: { id } });
   }
 
+  deleteAllByUser(userId: string) {
+    return this.prisma.shoppingList.deleteMany({ where: { userId } });
+  }
+
   addItem(listId: string, marketProductId: string, quantity: number) {
     return this.prisma.shoppingListItem.upsert({
       where: {

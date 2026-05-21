@@ -21,6 +21,7 @@ model User {
   
   lists          ShoppingList[]
   favorites      FavoriteProduct[]
+  searchHistory  ProductSearchHistory[]
   
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
@@ -129,6 +130,22 @@ model SearchCache {
   lastScrapedAt DateTime  @default(now())
 
   @@unique([query, marketSlug])
+}
+
+// Histórico de buscas recentes por usuário
+model ProductSearchHistory {
+  id              String    @id @default(uuid())
+  query           String
+  normalizedQuery String
+
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([userId, normalizedQuery])
+  @@index([userId, updatedAt])
 }
 
 // Produtos Favoritados para Monitoramento de Preço

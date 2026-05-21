@@ -4,6 +4,7 @@ import { Text } from "@components/text";
 import { ProductGroup } from "@services/products/types";
 import { Image, View } from "react-native";
 import { AddToListsBottomSheet } from "./components/add-to-lists-bottom-sheet";
+import { cn } from "@utils/cn";
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -60,7 +61,10 @@ export const ProductGroupCard = ({ group }: { group: ProductGroup }) => {
         {group.items.map((offer, index) => (
           <View
             key={offer.id}
-            className="flex-row items-center gap-3 border-border py-3 first:border-t-0"
+            className={cn(
+              "flex-row items-center gap-3 border-t border-border/60 py-3",
+              index === 0 && "border-t-0",
+            )}
           >
             <View className="min-w-0 flex-1 gap-1">
               <View className="flex-row flex-wrap items-center gap-2">
@@ -78,12 +82,14 @@ export const ProductGroupCard = ({ group }: { group: ProductGroup }) => {
               </Text>
             </View>
 
-            <View className="items-end gap-2">
-              <Text className="text-xl font-bold text-primary">
-                {formatPrice(offer.currentPrice)}
-              </Text>
+            <View className="flex-col sm:flex-row gap-3 sm:items-center">
+              <View className="items-end gap-2">
+                <Text className="text-xl font-bold text-primary">
+                  {formatPrice(offer.currentPrice)}
+                </Text>
+              </View>
+              <AddToListsBottomSheet product={offer} />
             </View>
-            <AddToListsBottomSheet product={offer} />
           </View>
         ))}
       </CardContent>
