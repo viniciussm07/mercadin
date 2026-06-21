@@ -8,7 +8,7 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "build": "expo export --platform web",
-    "build:tsc": "node --stack_size=8192 ./node_modules/typescript/lib/tsc.js -b tsconfig.json --noEmit"
+    "build:tsc": "node --stack_size=8192 ../node_modules/typescript-5/lib/tsc.js -b tsconfig.json --noEmit"
   },
   "dependencies": {
     "@expo-google-fonts/fraunces": "^0.4.1",
@@ -50,14 +50,15 @@
     "react-native-worklets": "0.5.1",
     "tailwind-merge": "^3.5.0",
     "tailwindcss-animate": "^1.0.7",
-    "zod": "3.25.76",
+    "zod": "4.4.3",
     "zustand": "^5.0.12"
   },
   "devDependencies": {
     "@types/react": "~19.1.0",
     "babel-preset-expo": "~54.0.10",
     "prettier-plugin-tailwindcss": "^0.5.14",
-    "tailwindcss": "^3.4.17"
+    "tailwindcss": "^3.4.17",
+    "typescript-5": "npm:typescript@5.9.3"
   },
   "private": true
 }
