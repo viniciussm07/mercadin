@@ -20,6 +20,53 @@ env:
   EXPO_NO_DOTENV: "1"
 
 jobs:
+  ci-server-tests:
+    name: ci-server-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.31.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: pnpm --filter @mercadin/server prisma:generate
+
+      - name: Run server tests with coverage
+        run: >
+          pnpm --filter @mercadin/server exec jest
+          --config jest.config.cjs
+          --coverage
+          --coverageReporters=json-summary
+          --coverageReporters=text
+
+      - name: Comment server coverage on pull request
+        if: github.event_name == 'pull_request'
+        uses: MishaKav/jest-coverage-comment@main
+        with:
+          coverage-summary-path: ./server/coverage/coverage-summary.json
+          title: Server Test Coverage
+          summary-title: Server Coverage Summary
+          badge-title: Server Coverage
+
   ci-eslint:
     name: ci-eslint
     runs-on: ubuntu-latest
