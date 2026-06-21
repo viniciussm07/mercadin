@@ -14,6 +14,7 @@ export const endpoints = {
   products: {
     search: "products/search",
     searchHistory: "products/search-history",
+    priceHistory: (marketProductId: string) => `products/${marketProductId}/price-history`,
   },
   priceComparisons: {
     list: (id: string) => `price-comparisons/lists/${id}`,

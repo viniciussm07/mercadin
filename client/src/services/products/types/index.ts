@@ -46,3 +46,18 @@ export interface SearchProductsParams {
   markets?: MARKET_SLUGS[];
   signal?: AbortSignal;
 }
+
+export interface PriceHistoryPoint {
+  price: number;
+  timestamp: string;
+}
+
+export interface PriceHistoryResponse {
+  marketProductId: string;
+  points: PriceHistoryPoint[];
+}
+
+export interface GetPriceHistoryParams {
+  marketProductId: string;
+  signal?: AbortSignal;
+}

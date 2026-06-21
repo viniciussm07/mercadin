@@ -49,7 +49,6 @@ export const AddToListsBottomSheet = ({ product }: AddToListsBottomSheetProps) =
       <BottomSheetTrigger asChild>
         <Button variant="outline" className="h-8 px-3">
           <Icon name="Plus" size={14} className="text-foreground" />
-          <Text className="font-questrial text-xs">Adicionar</Text>
         </Button>
       </BottomSheetTrigger>
 

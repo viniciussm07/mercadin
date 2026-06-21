@@ -62,7 +62,6 @@ model MarketProduct {
   id               String    @id @default(uuid())
   sku              String    // ID/Código interno usado no site do mercado
   nameInMarket     String    // Nome exato retornado pelo mercado (pode conter abreviações)
-  currentPrice     Float     // Preço mais recente capturado
   url              String?   // Link direto para a página do produto no mercado
   
   isAvailable      Boolean   @default(true)  // Controle de ruptura de estoque (Soft Delete)
@@ -87,6 +86,8 @@ model PriceHistory {
   
   marketProductId  String
   marketProduct    MarketProduct @relation(fields: [marketProductId], references: [id])
+
+  @@index([marketProductId, timestamp])
 }
 
 // -----------------------------------------------------------------------------
