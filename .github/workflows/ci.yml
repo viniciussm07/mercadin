@@ -63,6 +63,7 @@ jobs:
         uses: MishaKav/jest-coverage-comment@main
         with:
           coverage-summary-path: ./server/coverage/coverage-summary.json
+          junitxml-path: ./server/reports/junit/junit.xml
           title: Server Test Coverage
           summary-title: Server Coverage Summary
           badge-title: Server Coverage

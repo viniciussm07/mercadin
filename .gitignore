@@ -48,3 +48,4 @@ yarn-error.*
 /android
 
 server/coverage
+server/reports
