@@ -58,7 +58,7 @@ export const TrendingProductsSection = () => {
         ))}
 
         <Button variant="outline" onPress={() => navigate(AuthenticatedRouteNames.PROMOTIONS)}>
-          Ver mais
+          <Text>Ver mais</Text>
         </Button>
       </CardContent>
     </Card>

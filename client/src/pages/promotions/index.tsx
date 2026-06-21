@@ -14,7 +14,7 @@ export const Promotions = () => {
   const { promotions, periodDays, selectPeriod } = useTrendingProducts({ limit: 10 });
 
   return (
-    <ScrollView className="flex-1" contentContainerStyle={contentContainerStyle}>
+    <ScrollView className="flex-1 px-4 lg:px-8" contentContainerStyle={contentContainerStyle}>
       <View className="w-full max-w-4xl self-center">
         <View className="items-start gap-4">
           <View className="gap-2">

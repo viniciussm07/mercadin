@@ -32,7 +32,7 @@ export const PriceHistoryDialog = ({ id, nameInMarket, marketName }: Props) => {
           className="h-8 px-3"
           accessibilityLabel={`Ver histórico de preço de ${nameInMarket} no ${marketName}`}
         >
-          <Icon name="ChartLine" size={14} className="text-primary" />
+          <Icon name="ChartLine" size={18} className="text-primary" />
         </Button>
       </DialogTrigger>
 

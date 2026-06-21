@@ -7,7 +7,7 @@
   "scripts": {
     "dev:server": "pnpm --filter @mercadin/server dev",
     "dev:client": "pnpm --filter @mercadin/client dev",
-    "dev": "pnpm dev:server & pnpm dev:client",
+    "dev": "concurrently \"pnpm dev:server\" \"pnpm dev:client\"",
     "build:client": "pnpm --filter @mercadin/client build",
     "build:server": "pnpm --filter @mercadin/server build",
     "build": "pnpm run build:server && pnpm run build:client",
@@ -24,6 +24,7 @@
     "@eslint/js": "^9.39.2",
     "@typescript-eslint/eslint-plugin": "^8.56.1",
     "@typescript-eslint/parser": "^8.56.1",
+    "concurrently": "^10.0.3",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",

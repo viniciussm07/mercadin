@@ -94,7 +94,7 @@ export const ProductGroupCard = ({ group }: { group: ProductGroup }) => {
                   {formatPrice(offer.currentPrice)}
                 </Text>
               </View>
-              <View className="flex-row gap-2">
+              <View className="flex-row gap-2 self-end">
                 <AddToListsBottomSheet product={offer} />
               </View>
             </View>
