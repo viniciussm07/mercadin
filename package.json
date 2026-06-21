@@ -8,6 +8,7 @@
     "dev:server": "pnpm --filter @mercadin/server dev",
     "dev:client": "pnpm --filter @mercadin/client dev",
     "dev": "concurrently \"pnpm dev:server\" \"pnpm dev:client\"",
+    "prisma:generate": "pnpm --filter @mercadin/server prisma:generate",
     "build:client": "pnpm --filter @mercadin/client build",
     "build:server": "pnpm --filter @mercadin/server build",
     "build": "pnpm run build:server && pnpm run build:client",
