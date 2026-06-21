@@ -3,8 +3,8 @@ import { Icon } from "@components/icon";
 import { Text } from "@components/text";
 import { ProductGroup } from "@services/products/types";
 import { Image, View } from "react-native";
-import { AddToListsBottomSheet } from "../../../../components/add-to-lists-bottom-sheet";
-import { PriceHistoryDialog } from "../../../../components/price-history-dialog";
+import { AddToListsBottomSheet } from "@components/add-to-lists-bottom-sheet";
+import { PriceHistoryDialog } from "@components/price-history-dialog";
 import { cn } from "@utils/cn";
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
