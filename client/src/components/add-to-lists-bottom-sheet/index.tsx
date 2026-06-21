@@ -12,17 +12,16 @@ import { CreateShoppingListDialog } from "@components/create-shopping-list-dialo
 import { Icon } from "@components/icon";
 import { QuantityCounter } from "@components/quantity-counter";
 import { Text } from "@components/text";
-import { MarketProduct } from "@services/products/types";
 import { View } from "react-native";
 import { ListSelector } from "./components/list-selector";
 import { ListSearchInput } from "./components/list-search-input";
 import { useAddToListsBottomSheet } from "./hooks";
 
-type AddToListsBottomSheetProps = {
-  product: MarketProduct;
-};
+interface Props {
+  product: { id: string; nameInMarket: string };
+}
 
-export const AddToListsBottomSheet = ({ product }: AddToListsBottomSheetProps) => {
+export const AddToListsBottomSheet = ({ product }: Props) => {
   const {
     decreaseQuantity,
     filteredLists,

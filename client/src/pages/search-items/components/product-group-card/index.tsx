@@ -3,8 +3,8 @@ import { Icon } from "@components/icon";
 import { Text } from "@components/text";
 import { ProductGroup } from "@services/products/types";
 import { Image, View } from "react-native";
-import { AddToListsBottomSheet } from "./components/add-to-lists-bottom-sheet";
-import { PriceHistoryDialog } from "./components/price-history-dialog";
+import { AddToListsBottomSheet } from "../../../../components/add-to-lists-bottom-sheet";
+import { PriceHistoryDialog } from "../../../../components/price-history-dialog";
 import { cn } from "@utils/cn";
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
@@ -85,7 +85,11 @@ export const ProductGroupCard = ({ group }: { group: ProductGroup }) => {
 
             <View className="flex-col sm:flex-row gap-3 sm:items-center">
               <View className="flex flex-row items-center">
-                <PriceHistoryDialog product={offer} />
+                <PriceHistoryDialog
+                  id={offer.id}
+                  nameInMarket={offer.nameInMarket}
+                  marketName={offer.market.name}
+                />
                 <Text className="text-xl font-bold text-primary">
                   {formatPrice(offer.currentPrice)}
                 </Text>

@@ -10,17 +10,18 @@ import {
 import { Icon } from "@components/icon";
 import { Skeleton } from "@components/skeleton";
 import { Text } from "@components/text";
-import { MarketProduct } from "@services/products/types";
 import { View } from "react-native";
 import { PriceHistoryChart } from "./components/price-history-chart";
 import { usePriceHistoryDialog } from "./hooks";
 
-interface PriceHistoryDialogProps {
-  product: MarketProduct;
+interface Props {
+  id: string;
+  nameInMarket: string;
+  marketName: string;
 }
 
-export const PriceHistoryDialog = ({ product }: PriceHistoryDialogProps) => {
-  const { onOpenChange, open, priceHistory } = usePriceHistoryDialog(product.id);
+export const PriceHistoryDialog = ({ id, nameInMarket, marketName }: Props) => {
+  const { onOpenChange, open, priceHistory } = usePriceHistoryDialog(id);
   const points = priceHistory.data?.points ?? [];
 
   return (
@@ -29,7 +30,7 @@ export const PriceHistoryDialog = ({ product }: PriceHistoryDialogProps) => {
         <Button
           variant="ghost"
           className="h-8 px-3"
-          accessibilityLabel={`Ver histórico de preço de ${product.nameInMarket} no ${product.market.name}`}
+          accessibilityLabel={`Ver histórico de preço de ${nameInMarket} no ${marketName}`}
         >
           <Icon name="ChartLine" size={14} className="text-primary" />
         </Button>
@@ -39,7 +40,7 @@ export const PriceHistoryDialog = ({ product }: PriceHistoryDialogProps) => {
         <DialogHeader>
           <DialogTitle>Histórico de preço</DialogTitle>
           <DialogDescription numberOfLines={3}>
-            {product.nameInMarket} no {product.market.name} · Últimos 30 dias
+            {nameInMarket} no {marketName} · Últimos 30 dias
           </DialogDescription>
         </DialogHeader>
 
