@@ -1,7 +1,14 @@
 import { Injectable } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 import { PrismaService } from "@/database/prisma.service";
+import type { ScrapedProduct } from "@/modules/scraping/types/scraped-product.type";
 import { normalizeSearchText } from "../utils/normalize-search-text";
+import {
+  latestPriceQuery,
+  normalizePrice,
+  shouldRecordPrice,
+  withCurrentPrice,
+} from "../utils/current-price";
 
 export const QUERY_TTL_MS = 6 * 60 * 60 * 1000; // 6h
 const ALL_MARKETS_CACHE_SCOPE = "ALL";
@@ -11,6 +18,62 @@ const getCacheMarketSlug = (marketSlug: string | null) => marketSlug ?? ALL_MARK
 @Injectable()
 export class ProductsRepository {
   constructor(private readonly prisma: PrismaService) {}
+
+  async ingestProduct(marketId: string, product: ScrapedProduct): Promise<void> {
+    await this.prisma.$transaction(async tx => {
+      const scrapedAt = new Date();
+      const price = normalizePrice(product.price);
+      const master = await tx.masterProduct.upsert({
+        where: { ean: product.ean },
+        create: {
+          ean: product.ean,
+          name: product.name,
+          imageUrl: product.imageUrl,
+          brand: product.brand,
+        },
+        update: {
+          name: product.name,
+          imageUrl: product.imageUrl ?? undefined,
+          brand: product.brand ?? undefined,
+        },
+      });
+      const marketProduct = await tx.marketProduct.upsert({
+        where: { marketId_sku: { marketId, sku: product.sku } },
+        create: {
+          sku: product.sku,
+          nameInMarket: product.name,
+          url: product.url,
+          marketId,
+          masterProductId: master.id,
+          lastScrapedAt: scrapedAt,
+        },
+        update: {
+          nameInMarket: product.name,
+          url: product.url ?? undefined,
+          isAvailable: true,
+          masterProductId: master.id,
+          lastScrapedAt: scrapedAt,
+        },
+      });
+
+      await tx.$queryRaw(Prisma.sql`
+        SELECT "id"
+        FROM "MarketProduct"
+        WHERE "id" = ${marketProduct.id}
+        FOR UPDATE
+      `);
+      const latest = await tx.priceHistory.findFirst({
+        where: { marketProductId: marketProduct.id },
+        orderBy: latestPriceQuery.orderBy,
+      });
+
+      if (shouldRecordPrice(latest?.price ?? null, price)) {
+        await tx.priceHistory.create({
+          data: { marketProductId: marketProduct.id, price, timestamp: scrapedAt },
+        });
+      }
+    });
+  }
 
   async findByQuery(params: { normalizedQuery: string; marketSlugs?: string[]; ttlMs?: number }) {
     const { normalizedQuery, marketSlugs, ttlMs = QUERY_TTL_MS } = params;
@@ -42,10 +105,10 @@ export class ProductsRepository {
 
     const products = await this.prisma.marketProduct.findMany({
       where: { id: { in: ids } },
-      include: { market: true, masterProduct: true },
+      include: { market: true, masterProduct: true, history: latestPriceQuery },
     });
-    const productById = new Map(products.map(product => [product.id, product]));
-    const orderedProducts: typeof products = [];
+    const productById = new Map(products.map(product => [product.id, withCurrentPrice(product)]));
+    const orderedProducts = [];
     for (const id of ids) {
       const product = productById.get(id);
       if (product) {
@@ -74,20 +137,6 @@ export class ProductsRepository {
       where: { query_marketSlug: { query, marketSlug: cacheMarketSlug } },
       create: { query, marketSlug: cacheMarketSlug, lastScrapedAt: new Date() },
       update: { lastScrapedAt: new Date() },
-    });
-  }
-
-  findAll() {
-    return this.prisma.masterProduct.findMany({
-      include: {
-        variants: {
-          include: {
-            market: true,
-          },
-        },
-      },
-      orderBy: { createdAt: "desc" },
-      take: 100,
     });
   }
 }

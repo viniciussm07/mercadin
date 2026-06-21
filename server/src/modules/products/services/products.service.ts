@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { ProductsRepository } from "../repositories/products.repository";
+import { ProductCatalogRepository } from "../repositories/product-catalog.repository";
 import { ProductIngestService } from "./product-ingest.service";
 import { ScrapingOrchestratorService } from "@/modules/scraping/scraping-orchestrator.service";
 import { rankResults } from "../utils/rank-results";
@@ -12,6 +13,7 @@ const SEARCH_QUERY_MIN_LENGTH = 2;
 export class ProductsService {
   constructor(
     private readonly repo: ProductsRepository,
+    private readonly catalog: ProductCatalogRepository,
     private readonly ingest: ProductIngestService,
     private readonly orchestrator: ScrapingOrchestratorService,
   ) {}
@@ -112,6 +114,6 @@ export class ProductsService {
   }
 
   findAll() {
-    return this.repo.findAll();
+    return this.catalog.findAll();
   }
 }

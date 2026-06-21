@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "@/database/prisma.service";
 import { Prisma } from "@prisma/client";
+import { latestPriceQuery, withCurrentPrice } from "@/modules/products/utils/current-price";
 
 @Injectable()
 export class ShoppingListsRepository {
@@ -25,8 +26,8 @@ export class ShoppingListsRepository {
     });
   }
 
-  findDetailsByIdForUser(id: string, userId: string) {
-    return this.prisma.shoppingList.findFirst({
+  async findDetailsByIdForUser(id: string, userId: string) {
+    const list = await this.prisma.shoppingList.findFirst({
       where: { id, userId },
       include: {
         items: {
@@ -36,12 +37,22 @@ export class ShoppingListsRepository {
               include: {
                 market: true,
                 masterProduct: true,
+                history: latestPriceQuery,
               },
             },
           },
         },
       },
     });
+
+    if (!list) return null;
+    return {
+      ...list,
+      items: list.items.map(item => ({
+        ...item,
+        marketProduct: withCurrentPrice(item.marketProduct),
+      })),
+    };
   }
 
   create(userId: string, name: string) {

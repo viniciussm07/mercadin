@@ -5,6 +5,7 @@ import {
   SuperCart,
   SuperCartPick,
 } from "./types";
+import { readCurrentPrice } from "@/modules/products/utils/current-price";
 
 const toMoney = (value: number) => Number(value.toFixed(2));
 
@@ -27,7 +28,7 @@ export const aggregateByMaster = (items: PriceComparisonItem[]): AggregatedItem[
         marketId: variant.marketId,
         marketName: variant.market.name,
         marketProductId: variant.id,
-        price: variant.currentPrice,
+        price: readCurrentPrice(variant),
       })),
     });
   }
