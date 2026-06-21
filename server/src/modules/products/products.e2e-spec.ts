@@ -2,6 +2,7 @@ import { INestApplication } from "@nestjs/common";
 import request from "supertest";
 import { MARKET_SLUGS } from "@/common/constants/market-slugs.constant";
 import { ProductsController } from "@/modules/products/controllers/products.controller";
+import { PriceHistoryService } from "@/modules/products/services/price-history.service";
 import { ProductsService } from "@/modules/products/services/products.service";
 import { createTestApp } from "../../../test/helpers/create-test-app";
 
@@ -11,15 +12,21 @@ describe("Product endpoints", () => {
     findAll: jest.fn(),
     search: jest.fn(),
   };
+  const priceHistory = {
+    findByMarketProduct: jest.fn(),
+  };
 
   beforeAll(async () => {
     app = await createTestApp({
       controllers: [ProductsController],
-      providers: [{ provide: ProductsService, useValue: products }],
+      providers: [
+        { provide: ProductsService, useValue: products },
+        { provide: PriceHistoryService, useValue: priceHistory },
+      ],
     });
   });
 
-  afterAll(async () => app.close());
+  afterAll(async () => app?.close());
 
   it("searches products without requiring authentication", async () => {
     const result = { source: "cache", items: [] };

@@ -1,37 +1,40 @@
-import type { AggregatedItem, PriceComparisonItem } from "./types";
+import { createPriceComparisonItem } from "../../../test/fixtures/price-comparison-item";
+import type { AggregatedItem } from "./types";
 import { aggregateByMaster, buildByMarketCarts } from "./utils";
 
 const variants = [
   {
     id: "offer-a",
     marketId: "market-a",
-    currentPrice: 5.25,
+    price: 5.25,
     market: { name: "Market A" },
   },
   {
     id: "offer-b",
     marketId: "market-b",
-    currentPrice: 4.5,
+    price: 4.5,
     market: { name: "Market B" },
   },
 ];
 
-const createRawItem = (id: string, quantity: number): PriceComparisonItem =>
-  ({
-    id,
-    quantity,
-    marketProduct: {
-      masterProduct: {
-        id: "master-1",
-        name: "Rice",
-        variants,
-      },
-    },
-  }) as PriceComparisonItem;
-
 describe("price comparison utilities", () => {
   it("aggregates quantities by master product", () => {
-    const result = aggregateByMaster([createRawItem("item-1", 2), createRawItem("item-2", 3)]);
+    const result = aggregateByMaster([
+      createPriceComparisonItem({
+        id: "item-1",
+        quantity: 2,
+        masterProductId: "master-1",
+        masterProductName: "Rice",
+        variants,
+      }),
+      createPriceComparisonItem({
+        id: "item-2",
+        quantity: 3,
+        masterProductId: "master-1",
+        masterProductName: "Rice",
+        variants,
+      }),
+    ]);
 
     expect(result).toEqual([
       {

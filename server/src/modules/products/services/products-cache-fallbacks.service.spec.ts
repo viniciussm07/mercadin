@@ -1,5 +1,6 @@
 import { Test } from "@nestjs/testing";
 import { ScrapingOrchestratorService } from "@/modules/scraping/scraping-orchestrator.service";
+import { ProductCatalogRepository } from "../repositories/product-catalog.repository";
 import { ProductsRepository } from "../repositories/products.repository";
 import { ProductIngestService } from "./product-ingest.service";
 import { ProductsService } from "./products.service";
@@ -10,6 +11,7 @@ describe("ProductsService cache fallbacks", () => {
     isQueryFresh: jest.fn(),
     touchQueryCache: jest.fn(),
   };
+  const catalog = { findAll: jest.fn() };
   const ingest = { ingest: jest.fn() };
   const orchestrator = {
     listScrapers: jest.fn(),
@@ -22,6 +24,7 @@ describe("ProductsService cache fallbacks", () => {
       providers: [
         ProductsService,
         { provide: ProductsRepository, useValue: repo },
+        { provide: ProductCatalogRepository, useValue: catalog },
         { provide: ProductIngestService, useValue: ingest },
         { provide: ScrapingOrchestratorService, useValue: orchestrator },
       ],

@@ -1,6 +1,7 @@
 import { BadRequestException } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 import { ScrapingOrchestratorService } from "@/modules/scraping/scraping-orchestrator.service";
+import { ProductCatalogRepository } from "../repositories/product-catalog.repository";
 import { ProductsRepository } from "../repositories/products.repository";
 import { ProductIngestService } from "./product-ingest.service";
 import type { SearchProduct } from "./types";
@@ -26,11 +27,11 @@ const createProduct = (
 
 describe("ProductsService", () => {
   const repo = {
-    findAll: jest.fn(),
     findByQuery: jest.fn(),
     isQueryFresh: jest.fn(),
     touchQueryCache: jest.fn(),
   };
+  const catalog = { findAll: jest.fn() };
   const ingest = { ingest: jest.fn() };
   const orchestrator = {
     listScrapers: jest.fn(),
@@ -43,6 +44,7 @@ describe("ProductsService", () => {
       providers: [
         ProductsService,
         { provide: ProductsRepository, useValue: repo },
+        { provide: ProductCatalogRepository, useValue: catalog },
         { provide: ProductIngestService, useValue: ingest },
         { provide: ScrapingOrchestratorService, useValue: orchestrator },
       ],
@@ -130,6 +132,6 @@ describe("ProductsService", () => {
 
   it("delegates full product listing", () => {
     service.findAll();
-    expect(repo.findAll).toHaveBeenCalledTimes(1);
+    expect(catalog.findAll).toHaveBeenCalledTimes(1);
   });
 });

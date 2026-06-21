@@ -1,26 +1,8 @@
 import { NotFoundException } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
+import { createPriceComparisonItem } from "../../../../test/fixtures/price-comparison-item";
 import { PriceComparisonsRepository } from "../repositories/price-comparisons.repository";
-import type { PriceComparisonItem } from "../types";
 import { PriceComparisonsService } from "./price-comparisons.service";
-
-const createItem = (
-  id: string,
-  quantity: number,
-  variants: Array<{
-    id: string;
-    marketId: string;
-    currentPrice: number;
-    market: { name: string };
-  }>,
-): PriceComparisonItem =>
-  ({
-    id,
-    quantity,
-    marketProduct: {
-      masterProduct: { id, name: id, variants },
-    },
-  }) as PriceComparisonItem;
 
 describe("PriceComparisonsService", () => {
   const repo = {
@@ -48,14 +30,22 @@ describe("PriceComparisonsService", () => {
   it("calculates the cheapest complete market and super-cart savings", async () => {
     repo.findListByIdForUser.mockResolvedValueOnce({ id: "list-1" });
     repo.findItemsWithVariants.mockResolvedValueOnce([
-      createItem("rice", 2, [
-        { id: "rice-a", marketId: "a", currentPrice: 5, market: { name: "A" } },
-        { id: "rice-b", marketId: "b", currentPrice: 4, market: { name: "B" } },
-      ]),
-      createItem("beans", 1, [
-        { id: "beans-a", marketId: "a", currentPrice: 6, market: { name: "A" } },
-        { id: "beans-b", marketId: "b", currentPrice: 8, market: { name: "B" } },
-      ]),
+      createPriceComparisonItem({
+        id: "rice",
+        quantity: 2,
+        variants: [
+          { id: "rice-a", marketId: "a", price: 5, market: { name: "A" } },
+          { id: "rice-b", marketId: "b", price: 4, market: { name: "B" } },
+        ],
+      }),
+      createPriceComparisonItem({
+        id: "beans",
+        quantity: 1,
+        variants: [
+          { id: "beans-a", marketId: "a", price: 6, market: { name: "A" } },
+          { id: "beans-b", marketId: "b", price: 8, market: { name: "B" } },
+        ],
+      }),
     ]);
 
     await expect(service.compare("list-1", "user-1")).resolves.toEqual(
@@ -70,10 +60,12 @@ describe("PriceComparisonsService", () => {
   it("returns null savings when no single market is complete", async () => {
     repo.findListByIdForUser.mockResolvedValueOnce({ id: "list-1" });
     repo.findItemsWithVariants.mockResolvedValueOnce([
-      createItem("rice", 1, [
-        { id: "rice-a", marketId: "a", currentPrice: 5, market: { name: "A" } },
-      ]),
-      createItem("beans", 1, []),
+      createPriceComparisonItem({
+        id: "rice",
+        quantity: 1,
+        variants: [{ id: "rice-a", marketId: "a", price: 5, market: { name: "A" } }],
+      }),
+      createPriceComparisonItem({ id: "beans", quantity: 1, variants: [] }),
     ]);
 
     await expect(service.compare("list-1", "user-1")).resolves.toEqual(
