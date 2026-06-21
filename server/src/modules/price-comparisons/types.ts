@@ -7,7 +7,14 @@ export const priceComparisonItemInclude = {
         include: {
           variants: {
             where: { isAvailable: true },
-            include: { market: true },
+            include: {
+              market: true,
+              history: {
+                orderBy: [{ timestamp: "desc" }, { id: "desc" }],
+                take: 1,
+                select: { price: true },
+              },
+            },
           },
         },
       },

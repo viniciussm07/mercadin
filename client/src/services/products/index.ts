@@ -1,6 +1,13 @@
 import { endpoints } from "@services/endpoints";
 import { apiClient } from "@services/http";
-import { SearchProductsParams, SearchProductsResponse } from "./types";
+import {
+  GetPriceHistoryParams,
+  PriceHistoryResponse,
+  SearchProductsParams,
+  SearchProductsResponse,
+} from "./types";
+
+const PRICE_HISTORY_PERIOD_MS = 30 * 24 * 60 * 60 * 1000;
 
 export const productsService = {
   search: ({ q, markets = [], signal }: SearchProductsParams) => {
@@ -15,5 +22,20 @@ export const productsService = {
         signal,
       })
       .json<SearchProductsResponse>();
+  },
+  getPriceHistory: ({ marketProductId, signal }: GetPriceHistoryParams) => {
+    const to = new Date();
+    const from = new Date(to.getTime() - PRICE_HISTORY_PERIOD_MS);
+
+    return apiClient
+      .get(endpoints.products.priceHistory(marketProductId), {
+        searchParams: {
+          from: from.toISOString(),
+          to: to.toISOString(),
+          limit: "1000",
+        },
+        signal,
+      })
+      .json<PriceHistoryResponse>();
   },
 };

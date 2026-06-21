@@ -5,6 +5,9 @@
   "main": "./dist/main.js",
   "scripts": {
     "build": "nest build",
+    "db:up": "docker compose up -d postgres",
+    "pgadmin:up": "docker compose up -d pgadmin",
+    "db:down": "docker compose down",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:migrate:reset": "prisma migrate reset",
