@@ -3,15 +3,9 @@ import { Icon } from "@components/icon";
 import { QuantityCounter } from "@components/quantity-counter";
 import { Text } from "@components/text";
 import { ShoppingListItem } from "@services/shopping-lists/types";
+import { formatCurrency } from "@utils/currency";
 import { Image, View } from "react-native";
 import { useShoppingListItemCard } from "./hooks";
-
-const currencyFormatter = new Intl.NumberFormat("pt-BR", {
-  currency: "BRL",
-  style: "currency",
-});
-
-const formatPrice = (price: number) => currencyFormatter.format(price);
 
 type ShoppingListItemCardProps = {
   item: ShoppingListItem;
@@ -65,7 +59,7 @@ export const ShoppingListItemCard = ({ item, listId }: ShoppingListItemCardProps
             {product ? (
               <View className="items-end">
                 <Text className="text-lg font-bold text-primary">
-                  {formatPrice(product.currentPrice)}
+                  {formatCurrency(product.currentPrice)}
                 </Text>
               </View>
             ) : null}

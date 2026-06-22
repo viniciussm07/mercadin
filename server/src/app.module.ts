@@ -10,6 +10,7 @@ import { ScrapingModule } from "./modules/scraping/scraping.module";
 import { ProductsModule } from "./modules/products/products.module";
 import { ShoppingListsModule } from "./modules/shopping-lists/shopping-lists.module";
 import { PriceComparisonsModule } from "./modules/price-comparisons/price-comparisons.module";
+import { PromotionsModule } from "./modules/promotions/promotions.module";
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { PriceComparisonsModule } from "./modules/price-comparisons/price-compar
     ProductsModule,
     ShoppingListsModule,
     PriceComparisonsModule,
+    PromotionsModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: JwtAuthGuard }],
 })

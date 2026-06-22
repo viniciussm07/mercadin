@@ -1,8 +1,3 @@
-const currencyFormatter = new Intl.NumberFormat("pt-BR", {
-  style: "currency",
-  currency: "BRL",
-});
-
 const axisPriceFormatter = new Intl.NumberFormat("pt-BR", {
   minimumFractionDigits: 0,
   maximumFractionDigits: 2,
@@ -18,8 +13,6 @@ const fullDateFormatter = new Intl.DateTimeFormat("pt-BR", {
   month: "long",
   year: "numeric",
 });
-
-export const formatPrice = (price: number) => currencyFormatter.format(price);
 
 export const formatAxisPrice = (value: string) => `R$ ${axisPriceFormatter.format(Number(value))}`;
 

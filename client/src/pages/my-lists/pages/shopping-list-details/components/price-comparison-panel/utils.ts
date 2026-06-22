@@ -1,9 +1,4 @@
-const currencyFormatter = new Intl.NumberFormat("pt-BR", {
-  currency: "BRL",
-  style: "currency",
-});
-
-export const formatCurrency = (value: number) => currencyFormatter.format(value);
+export { formatCurrency } from "@utils/currency";
 
 export const itemCountLabel = (count: number) => `${count} ${count === 1 ? "item" : "itens"}`;
 
