@@ -47,5 +47,20 @@ yarn-error.*
 /ios
 /android
 
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+terraform.tfvars
+*.tfvars
+!*.tfvars.example
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraform.lock.hcl
+
+# tests
 server/coverage
 server/reports
