@@ -5,7 +5,7 @@ import { Text } from "@components/text";
 import { promotionPeriods, useTrendingProducts } from "@hooks/trending-products/hooks";
 import { AddToListsBottomSheet } from "@components/add-to-lists-bottom-sheet";
 import { PriceHistoryDialog } from "@components/price-history-dialog";
-import { formatPrice } from "@components/price-history-dialog/components/price-history-chart/utils";
+import { formatCurrency } from "@utils/currency";
 import { Image, ScrollView, View } from "react-native";
 
 const contentContainerStyle = { paddingBottom: 120, paddingTop: 56 };
@@ -71,7 +71,7 @@ export const Promotions = () => {
                     <View className="flex flex-row w-full justify-between">
                       <View className="flex items-start gap-1">
                         <Text className="text-xl font-bold text-primary">
-                          {formatPrice(item.endPrice)}
+                          {formatCurrency(item.endPrice)}
                         </Text>
                         <View className="rounded-full bg-primary/10 px-2 py-1">
                           <Text className="font-questrial text-[10px] uppercase text-primary">

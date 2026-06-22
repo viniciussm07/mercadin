@@ -6,13 +6,7 @@ import { Image, View } from "react-native";
 import { AddToListsBottomSheet } from "@components/add-to-lists-bottom-sheet";
 import { PriceHistoryDialog } from "@components/price-history-dialog";
 import { cn } from "@utils/cn";
-
-const currencyFormatter = new Intl.NumberFormat("pt-BR", {
-  style: "currency",
-  currency: "BRL",
-});
-
-const formatPrice = (price: number) => currencyFormatter.format(price);
+import { formatCurrency } from "@utils/currency";
 
 export const ProductGroupCard = ({ group }: { group: ProductGroup }) => {
   const imageUrl = group.masterProduct.imageUrl?.trim();
@@ -91,7 +85,7 @@ export const ProductGroupCard = ({ group }: { group: ProductGroup }) => {
                   marketName={offer.market.name}
                 />
                 <Text className="text-xl font-bold text-primary">
-                  {formatPrice(offer.currentPrice)}
+                  {formatCurrency(offer.currentPrice)}
                 </Text>
               </View>
               <View className="flex-row gap-2 self-end">

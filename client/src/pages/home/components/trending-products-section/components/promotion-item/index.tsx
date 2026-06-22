@@ -2,12 +2,8 @@ import { Icon } from "@components/icon";
 import { Text } from "@components/text";
 import { AddToListsBottomSheet } from "@components/add-to-lists-bottom-sheet";
 import { Promotion } from "@services/promotions/types";
+import { formatCurrency } from "@utils/currency";
 import { Image, View } from "react-native";
-
-const currencyFormatter = new Intl.NumberFormat("pt-BR", {
-  style: "currency",
-  currency: "BRL",
-});
 
 export const PromotionItem = ({ promotion }: { promotion: Promotion }) => {
   const imageUrl = promotion.masterProduct.imageUrl?.trim();
@@ -33,7 +29,7 @@ export const PromotionItem = ({ promotion }: { promotion: Promotion }) => {
         </Text>
         <View className="flex-row flex-wrap items-center gap-2">
           <Text className="text-xl font-bold text-primary">
-            {currencyFormatter.format(promotion.endPrice)}
+            {formatCurrency(promotion.endPrice)}
           </Text>
           <View className="rounded-full bg-green-700/10 px-2 py-1">
             <Text className="font-questrial text-[10px] uppercase text-green-700">
