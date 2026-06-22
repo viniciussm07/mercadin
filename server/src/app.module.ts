@@ -24,7 +24,7 @@ import { CronjobsModule } from "@modules/cronjobs/cronjobs.module";
     ShoppingListsModule,
     PriceComparisonsModule,
     PromotionsModule,
-    CronjobsModule
+    CronjobsModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: JwtAuthGuard }],
 })

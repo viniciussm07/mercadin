@@ -13,34 +13,34 @@ export class TendaAtacadoCronScraper {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  private parseJsonLd(html: string, ean: string, name: string, price: number) {
+private parseJsonLd(html: string, ean: string, name: string, price: number) {
     const $ = cheerio.load(html);
-    let parsedEan = ean;
-    let parsedName = name;
-    let parsedPrice = price;
+    let result = { ean, name, price };
 
-    /* eslint-disable-next-line quotes */
     $('script[type="application/ld+json"]').each((_, el) => {
       try {
         const jsonLd = JSON.parse($(el).html() || "{}");
         if (jsonLd["@type"] === "Product" || jsonLd.name) {
-          if (!parsedName) parsedName = jsonLd.name;
-          if (!parsedEan && jsonLd.gtin) parsedEan = jsonLd.gtin;
-          if (!parsedEan && jsonLd.sku) {
-            parsedEan = jsonLd.sku.replace(/^0+/, "").split("-")[0];
-          }
-          if (!Number.isFinite(parsedPrice) && jsonLd.offers?.price) {
-            parsedPrice = Number(jsonLd.offers.price);
-          }
-          if (!Number.isFinite(parsedPrice) && jsonLd.offers?.lowPrice) {
-            parsedPrice = Number(jsonLd.offers.lowPrice);
-          }
+          result = this.updateResultWithJsonLd(result, jsonLd);
         }
       } catch {
         this.logger.debug("Falha JSON-LD");
       }
     });
-    return { ean: parsedEan, name: parsedName, price: parsedPrice };
+    return result;
+  }
+
+  private updateResultWithJsonLd(current: any, jsonLd: any) {
+    const next = { ...current };
+    if (!next.name) next.name = jsonLd.name;
+    if (!next.ean && jsonLd.gtin) next.ean = jsonLd.gtin;
+    if (!next.ean && jsonLd.sku) next.ean = jsonLd.sku.replace(/^0+/, "").split("-")[0];
+    
+    const offerPrice = jsonLd.offers?.price || jsonLd.offers?.lowPrice;
+    if (!Number.isFinite(next.price) && offerPrice) {
+      next.price = Number(offerPrice);
+    }
+    return next;
   }
 
   private async scrapeSingleProduct(originalUrl: string) {
