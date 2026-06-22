@@ -62,6 +62,7 @@ jobs:
     needs: release
     if: needs.release.outputs.released == 'true' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    permissions: {}
     environment: production
     timeout-minutes: 20
 
