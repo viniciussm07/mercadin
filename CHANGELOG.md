@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/viniciussm07/mercadin/compare/v1.0.0...v1.0.1) (2026-06-22)
+
+
+### Bug Fixes
+
+* use commit hash in workflow packages ([054ead6](https://github.com/viniciussm07/mercadin/commit/054ead60b477206a7581fc6c9fe687c9f0ce8c5e))
+
 # 1.0.0 (2026-06-22)
 
 
