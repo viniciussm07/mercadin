@@ -7,7 +7,7 @@
   "scripts": {
     "dev:server": "pnpm --filter @mercadin/server dev",
     "dev:client": "pnpm --filter @mercadin/client dev",
-    "dev": "pnpm dev:server & pnpm dev:client",
+    "dev": "concurrently \"pnpm dev:server\" \"pnpm dev:client\"",
     "prisma:generate": "pnpm --filter @mercadin/server prisma:generate",
     "build:client": "pnpm --filter @mercadin/client build",
     "build:server": "pnpm --filter @mercadin/server build",
@@ -20,11 +20,15 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": ">=24.13.0 <25"
+  },
   "packageManager": "pnpm@10.31.0",
   "devDependencies": {
     "@eslint/js": "^9.39.2",
     "@typescript-eslint/eslint-plugin": "^8.56.1",
     "@typescript-eslint/parser": "^8.56.1",
+    "concurrently": "^10.0.3",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
