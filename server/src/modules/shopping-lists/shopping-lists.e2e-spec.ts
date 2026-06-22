@@ -1,39 +1,24 @@
-import { INestApplication } from "@nestjs/common";
 import request from "supertest";
-import { ShoppingListsController } from "@/modules/shopping-lists/controllers/shopping-lists.controller";
-import { ShoppingListsService } from "@/modules/shopping-lists/services/shopping-lists.service";
-import { authHeader, createTestApp, TEST_USER } from "../../../test/helpers/create-test-app";
+import { authHeader, TEST_USER } from "../../../test/helpers/create-test-app";
+import { createShoppingListsTestContext } from "../../../test/helpers/create-shopping-lists-test-context";
 
 describe("Shopping list endpoints", () => {
-  let app: INestApplication;
-  const lists = {
-    addItem: jest.fn(),
-    addItemToLists: jest.fn(),
-    create: jest.fn(),
-    findAll: jest.fn(),
-    findOne: jest.fn(),
-    remove: jest.fn(),
-    removeAll: jest.fn(),
-    removeItem: jest.fn(),
-    update: jest.fn(),
-    updateItemQuantity: jest.fn(),
-  };
+  let context: Awaited<ReturnType<typeof createShoppingListsTestContext>>;
 
   beforeAll(async () => {
-    app = await createTestApp({
-      controllers: [ShoppingListsController],
-      providers: [{ provide: ShoppingListsService, useValue: lists }],
-    });
+    context = await createShoppingListsTestContext();
   });
 
-  afterAll(async () => app.close());
+  afterAll(async () => context.app.close());
 
   it("requires authentication", async () => {
+    const { app, lists } = context;
     await request(app.getHttpServer()).get("/shopping-lists").expect(401);
     expect(lists.findAll).not.toHaveBeenCalled();
   });
 
   it("lists the authenticated user's lists", async () => {
+    const { app, lists } = context;
     const result = [{ id: "list-1", name: "Monthly" }];
     lists.findAll.mockResolvedValueOnce(result);
 
@@ -47,6 +32,7 @@ describe("Shopping list endpoints", () => {
   });
 
   it("returns one list", async () => {
+    const { app, lists } = context;
     lists.findOne.mockResolvedValueOnce({ id: "list-1" });
 
     await request(app.getHttpServer()).get("/shopping-lists/list-1").set(authHeader).expect(200);
@@ -55,6 +41,7 @@ describe("Shopping list endpoints", () => {
   });
 
   it("creates a list", async () => {
+    const { app, lists } = context;
     lists.create.mockResolvedValueOnce({ id: "list-1", name: "Weekly" });
 
     await request(app.getHttpServer())
@@ -67,6 +54,7 @@ describe("Shopping list endpoints", () => {
   });
 
   it("rejects an empty list name", async () => {
+    const { app } = context;
     await request(app.getHttpServer())
       .post("/shopping-lists")
       .set(authHeader)
@@ -75,6 +63,7 @@ describe("Shopping list endpoints", () => {
   });
 
   it("updates a list", async () => {
+    const { app, lists } = context;
     lists.update.mockResolvedValueOnce({ id: "list-1", name: "Updated" });
 
     await request(app.getHttpServer())
@@ -87,6 +76,7 @@ describe("Shopping list endpoints", () => {
   });
 
   it("removes one list and all user lists", async () => {
+    const { app, lists } = context;
     lists.remove.mockResolvedValueOnce({ id: "list-1" });
     lists.removeAll.mockResolvedValueOnce({ count: 1 });
 

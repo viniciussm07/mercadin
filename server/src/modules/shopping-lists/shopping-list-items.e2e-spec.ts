@@ -1,34 +1,18 @@
-import { INestApplication } from "@nestjs/common";
 import request from "supertest";
-import { ShoppingListsController } from "@/modules/shopping-lists/controllers/shopping-lists.controller";
-import { ShoppingListsService } from "@/modules/shopping-lists/services/shopping-lists.service";
-import { authHeader, createTestApp, TEST_USER } from "../../../test/helpers/create-test-app";
+import { authHeader, TEST_USER } from "../../../test/helpers/create-test-app";
+import { createShoppingListsTestContext } from "../../../test/helpers/create-shopping-lists-test-context";
 
 describe("Shopping list item endpoints", () => {
-  let app: INestApplication;
-  const lists = {
-    addItem: jest.fn(),
-    addItemToLists: jest.fn(),
-    create: jest.fn(),
-    findAll: jest.fn(),
-    findOne: jest.fn(),
-    remove: jest.fn(),
-    removeAll: jest.fn(),
-    removeItem: jest.fn(),
-    update: jest.fn(),
-    updateItemQuantity: jest.fn(),
-  };
+  let context: Awaited<ReturnType<typeof createShoppingListsTestContext>>;
 
   beforeAll(async () => {
-    app = await createTestApp({
-      controllers: [ShoppingListsController],
-      providers: [{ provide: ShoppingListsService, useValue: lists }],
-    });
+    context = await createShoppingListsTestContext();
   });
 
-  afterAll(async () => app.close());
+  afterAll(async () => context.app.close());
 
   it("adds an item to a list", async () => {
+    const { app, lists } = context;
     const dto = { marketProductId: "product-1", quantity: 2 };
     lists.addItem.mockResolvedValueOnce({ id: "item-1", ...dto });
 
@@ -42,6 +26,7 @@ describe("Shopping list item endpoints", () => {
   });
 
   it("adds an item to multiple lists", async () => {
+    const { app, lists } = context;
     const dto = {
       listIds: ["list-1", "list-2"],
       marketProductId: "product-1",
@@ -59,6 +44,7 @@ describe("Shopping list item endpoints", () => {
   });
 
   it("rejects invalid item quantities", async () => {
+    const { app, lists } = context;
     await request(app.getHttpServer())
       .post("/shopping-lists/list-1/items")
       .set(authHeader)
@@ -69,6 +55,7 @@ describe("Shopping list item endpoints", () => {
   });
 
   it("updates an item quantity", async () => {
+    const { app, lists } = context;
     const dto = { marketProductId: "product-1", quantity: 3 };
     lists.updateItemQuantity.mockResolvedValueOnce({ id: "item-1", quantity: 3 });
 
@@ -82,6 +69,7 @@ describe("Shopping list item endpoints", () => {
   });
 
   it("removes an item", async () => {
+    const { app, lists } = context;
     lists.removeItem.mockResolvedValueOnce({ id: "item-1" });
 
     await request(app.getHttpServer())

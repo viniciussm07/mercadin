@@ -1,40 +1,16 @@
-import { Test } from "@nestjs/testing";
-import { ScrapingOrchestratorService } from "@/modules/scraping/scraping-orchestrator.service";
-import { ProductCatalogRepository } from "../repositories/product-catalog.repository";
-import { ProductsRepository } from "../repositories/products.repository";
-import { ProductIngestService } from "./product-ingest.service";
-import { ProductsService } from "./products.service";
+import { createProductsServiceTestContext } from "../../../../test/helpers/create-products-service-test-context";
 
 describe("ProductsService cache fallbacks", () => {
-  const repo = {
-    findByQuery: jest.fn(),
-    isQueryFresh: jest.fn(),
-    touchQueryCache: jest.fn(),
-  };
-  const catalog = { findAll: jest.fn() };
-  const ingest = { ingest: jest.fn() };
-  const orchestrator = {
-    listScrapers: jest.fn(),
-    search: jest.fn(),
-  };
-  let service: ProductsService;
+  let context: Awaited<ReturnType<typeof createProductsServiceTestContext>>;
 
   beforeAll(async () => {
-    const moduleRef = await Test.createTestingModule({
-      providers: [
-        ProductsService,
-        { provide: ProductsRepository, useValue: repo },
-        { provide: ProductCatalogRepository, useValue: catalog },
-        { provide: ProductIngestService, useValue: ingest },
-        { provide: ScrapingOrchestratorService, useValue: orchestrator },
-      ],
-    }).compile();
-    service = moduleRef.get(ProductsService);
+    context = await createProductsServiceTestContext();
   });
 
   beforeEach(() => jest.clearAllMocks());
 
   it("falls back to cached results when no global scraper succeeds", async () => {
+    const { ingest, orchestrator, repo, service } = context;
     repo.isQueryFresh.mockResolvedValueOnce(false);
     repo.findByQuery.mockResolvedValueOnce([]);
     orchestrator.search.mockResolvedValueOnce([]);
@@ -47,6 +23,7 @@ describe("ProductsService cache fallbacks", () => {
   });
 
   it("does not refresh a selected scope when its scraper returns another market", async () => {
+    const { ingest, orchestrator, repo, service } = context;
     repo.isQueryFresh.mockResolvedValueOnce(false);
     repo.findByQuery.mockResolvedValueOnce([]);
     orchestrator.search.mockResolvedValueOnce([

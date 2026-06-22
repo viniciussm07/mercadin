@@ -1,11 +1,6 @@
 import { BadRequestException } from "@nestjs/common";
-import { Test } from "@nestjs/testing";
-import { ScrapingOrchestratorService } from "@/modules/scraping/scraping-orchestrator.service";
-import { ProductCatalogRepository } from "../repositories/product-catalog.repository";
-import { ProductsRepository } from "../repositories/products.repository";
-import { ProductIngestService } from "./product-ingest.service";
+import { createProductsServiceTestContext } from "../../../../test/helpers/create-products-service-test-context";
 import type { SearchProduct } from "./types";
-import { ProductsService } from "./products.service";
 
 const createProduct = (
   id: string,
@@ -26,39 +21,21 @@ const createProduct = (
   }) as SearchProduct;
 
 describe("ProductsService", () => {
-  const repo = {
-    findByQuery: jest.fn(),
-    isQueryFresh: jest.fn(),
-    touchQueryCache: jest.fn(),
-  };
-  const catalog = { findAll: jest.fn() };
-  const ingest = { ingest: jest.fn() };
-  const orchestrator = {
-    listScrapers: jest.fn(),
-    search: jest.fn(),
-  };
-  let service: ProductsService;
+  let context: Awaited<ReturnType<typeof createProductsServiceTestContext>>;
 
   beforeAll(async () => {
-    const moduleRef = await Test.createTestingModule({
-      providers: [
-        ProductsService,
-        { provide: ProductsRepository, useValue: repo },
-        { provide: ProductCatalogRepository, useValue: catalog },
-        { provide: ProductIngestService, useValue: ingest },
-        { provide: ScrapingOrchestratorService, useValue: orchestrator },
-      ],
-    }).compile();
-    service = moduleRef.get(ProductsService);
+    context = await createProductsServiceTestContext();
   });
 
   beforeEach(() => jest.clearAllMocks());
 
   it("rejects short normalized queries", async () => {
+    const { service } = context;
     await expect(service.search(" a ")).rejects.toBeInstanceOf(BadRequestException);
   });
 
   it("returns grouped and price-sorted cached results", async () => {
+    const { orchestrator, repo, service } = context;
     repo.isQueryFresh.mockResolvedValueOnce(true);
     repo.findByQuery.mockResolvedValueOnce([
       createProduct("offer-1", "master-1", "Arroz", 12),
@@ -75,6 +52,7 @@ describe("ProductsService", () => {
   });
 
   it("scrapes all markets, ingests products and refreshes the global cache", async () => {
+    const { ingest, orchestrator, repo, service } = context;
     const batch = {
       marketSlug: "MARKET",
       marketName: "Market",
@@ -94,6 +72,7 @@ describe("ProductsService", () => {
   });
 
   it("keeps cache source when every selected market is fresh", async () => {
+    const { repo, service } = context;
     repo.isQueryFresh.mockResolvedValue(true);
     repo.findByQuery.mockResolvedValueOnce([]);
 
@@ -110,6 +89,7 @@ describe("ProductsService", () => {
   });
 
   it("scrapes stale selected markets and refreshes only successful scopes", async () => {
+    const { ingest, orchestrator, repo, service } = context;
     const batch = {
       marketSlug: "B",
       marketName: "Market B",
@@ -131,6 +111,7 @@ describe("ProductsService", () => {
   });
 
   it("delegates full product listing", () => {
+    const { catalog, service } = context;
     service.findAll();
     expect(catalog.findAll).toHaveBeenCalledTimes(1);
   });
