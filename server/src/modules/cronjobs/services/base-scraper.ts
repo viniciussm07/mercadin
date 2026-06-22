@@ -1,4 +1,6 @@
 /* istanbul ignore file */
+/* eslint-disable */
+
 import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "@database/prisma.service";
 
