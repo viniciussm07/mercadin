@@ -3,7 +3,7 @@ resource "aws_instance" "mercadin" {
   instance_type               = var.instance_type
   key_name                    = var.key_name
   vpc_security_group_ids      = [aws_security_group.mercadin.id]
-  associate_public_ip_address = true
+  associate_public_ip_address = true # NOSONAR — public IP required: instance serves web traffic on ports 80/443
 
   user_data = templatefile("${path.module}/user_data.sh", {
     db_password          = var.db_password
