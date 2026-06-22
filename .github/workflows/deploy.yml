@@ -1,0 +1,112 @@
+name: Release & Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CI: true
+
+jobs:
+  release:
+    name: release
+    runs-on: ubuntu-latest
+
+    outputs:
+      released: ${{ steps.semantic.outputs.new_release_published }}
+      version: ${{ steps.semantic.outputs.new_release_version }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        with:
+          version: 10.31.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Semantic Release
+        id: semantic
+        uses: cycjimmy/semantic-release-action@0a51e81134e9a17a45f6a12740c1e4c2b4e67fef # v4.2.1
+        with:
+          extra_plugins: |
+            @semantic-release/changelog
+            @semantic-release/git
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy:
+    name: deploy
+    needs: release
+    if: needs.release.outputs.released == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 20
+
+    steps:
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@2ead5e36573dc217ba78e7e4ede5ee4a0e5ab5f2 # v1.2.2
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ubuntu
+          key: ${{ secrets.DEPLOY_KEY }}
+          command_timeout: 15m
+          envs: DEPLOY_DOMAIN
+          script: |
+            set -euo pipefail
+
+            cd /opt/mercadin
+            sudo -u mercadin git pull origin main
+
+            sudo -u mercadin bash -c '
+              set -euo pipefail
+              set -a; source /etc/mercadin/env; set +a
+
+              cd /opt/mercadin
+              pnpm install --frozen-lockfile
+
+              cd server
+              npx prisma generate
+              npx prisma migrate deploy
+              pnpm build
+            '
+
+            sudo systemctl restart mercadin
+
+            echo "Waiting for API..."
+            until curl -so /dev/null http://127.0.0.1:3050; do
+              sleep 2
+            done
+            echo "API is up!"
+
+            sudo -u mercadin bash -c "
+              cd /opt/mercadin/client
+              EXPO_PUBLIC_API_URL=https://${DEPLOY_DOMAIN}/api pnpm build
+            "
+
+            sudo systemctl restart nginx
+            echo "Deploy complete!"
+        env:
+          DEPLOY_DOMAIN: ${{ secrets.DEPLOY_DOMAIN }}
