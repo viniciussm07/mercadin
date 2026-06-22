@@ -20,6 +20,54 @@ env:
   EXPO_NO_DOTENV: "1"
 
 jobs:
+  ci-server-tests:
+    name: ci-server-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        with:
+          version: 10.31.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Generate Prisma Client
+        run: pnpm --filter @mercadin/server prisma:generate
+
+      - name: Run server tests with coverage
+        run: >
+          pnpm --filter @mercadin/server exec jest
+          --config jest.config.cjs
+          --coverage
+          --coverageReporters=json-summary
+          --coverageReporters=text
+
+      - name: Comment server coverage on pull request
+        if: github.event_name == 'pull_request'
+        uses: MishaKav/jest-coverage-comment@fb83bcbaeb5ca467936175796f862a2992938833
+        with:
+          coverage-summary-path: ./server/coverage/coverage-summary.json
+          junitxml-path: ./server/reports/junit/junit.xml
+          title: Server Test Coverage
+          summary-title: Server Coverage Summary
+          badge-title: Server Coverage
+
   ci-eslint:
     name: ci-eslint
     runs-on: ubuntu-latest
@@ -42,7 +90,7 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Run ESLint
         run: pnpm lint
@@ -69,7 +117,7 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Generate Prisma Client
         run: pnpm --filter @mercadin/server prisma:generate
@@ -99,7 +147,7 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Generate Prisma Client
         run: pnpm --filter @mercadin/server prisma:generate
