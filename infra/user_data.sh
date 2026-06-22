@@ -114,7 +114,7 @@ systemctl enable mercadin
 systemctl start mercadin
 
 echo "Waiting for API to respond..."
-until curl -sf http://127.0.0.1:3050 > /dev/null 2>&1; do
+until curl -so /dev/null http://127.0.0.1:3050; do
   sleep 2
 done
 echo "API is up!"
