@@ -1,148 +1,67 @@
 /* istanbul ignore file */
-
 import { Injectable, Logger } from "@nestjs/common";
 import * as cheerio from "cheerio";
-import "dotenv/config";
 import { PrismaService } from "@database/prisma.service";
-
-const USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36";
+import { BaseScraper } from "./base-scraper";
 
 @Injectable()
-export class TendaAtacadoCronScraper {
-  private readonly logger = new Logger(TendaAtacadoCronScraper.name);
+export class TendaAtacadoCronScraper extends BaseScraper {
+  protected readonly logger = new Logger(TendaAtacadoCronScraper.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(protected readonly prisma: PrismaService) {
+    super(prisma);
+  }
 
-private parseJsonLd(html: string, ean: string, name: string, price: number) {
+  private parseJsonLd(html: string) {
     const $ = cheerio.load(html);
-    let result = { ean, name, price };
-
+    let result = { ean: "", name: "", price: Number.NaN };
     $('script[type="application/ld+json"]').each((_, el) => {
       try {
         const jsonLd = JSON.parse($(el).html() || "{}");
         if (jsonLd["@type"] === "Product" || jsonLd.name) {
-          result = this.updateResultWithJsonLd(result, jsonLd);
+          if (!result.name) result.name = jsonLd.name;
+          if (!result.ean && jsonLd.gtin) result.ean = jsonLd.gtin;
+          if (!result.ean && jsonLd.sku) result.ean = jsonLd.sku.replace(/^0+/, "").split("-")[0];
+          const price = jsonLd.offers?.price || jsonLd.offers?.lowPrice;
+          if (!Number.isFinite(result.price) && price) result.price = Number(price);
         }
-      } catch {
-        this.logger.debug("Falha JSON-LD");
-      }
+      } catch {}
     });
     return result;
   }
 
-  private updateResultWithJsonLd(current: any, jsonLd: any) {
-    const next = { ...current };
-    if (!next.name) next.name = jsonLd.name;
-    if (!next.ean && jsonLd.gtin) next.ean = jsonLd.gtin;
-    if (!next.ean && jsonLd.sku) next.ean = jsonLd.sku.replace(/^0+/, "").split("-")[0];
-    
-    const offerPrice = jsonLd.offers?.price || jsonLd.offers?.lowPrice;
-    if (!Number.isFinite(next.price) && offerPrice) {
-      next.price = Number(offerPrice);
-    }
-    return next;
-  }
-
-  private async scrapeSingleProduct(originalUrl: string) {
+  private async scrapeSingleProduct(url: string) {
     try {
-      const url = originalUrl.includes("www.tendaatacado")
-        ? originalUrl
-        : originalUrl.replace("https://tendaatacado", "https://www.tendaatacado");
-
-      const res = await fetch(url, {
-        headers: { "User-Agent": USER_AGENT, Accept: "text/html" },
-      });
-
+      const res = await fetch(url.replace("https://tendaatacado", "https://www.tendaatacado"), { headers: { "User-Agent": "..." } });
       if (res.status === 404) return { isAvailable: false };
-      if (res.status === 403 || res.status === 429 || res.status === 503) {
-        return { isBlocked: true };
-      }
-      if (!res.ok) throw new Error(`Falha: ${res.status}`);
-
+      
       const html = await res.text();
       const $ = cheerio.load(html);
-
+      
       /* eslint-disable-next-line quotes */
       let name = $('meta[itemprop="name"]').attr("content")?.trim() || "";
-      let price = Number.NaN;
-      let ean = "";
-
-      /* eslint-disable-next-line quotes */
-      const priceText = $('meta[itemprop="price"]').attr("content")?.trim();
-      if (priceText) price = Number(priceText);
-
-      /* eslint-disable-next-line quotes */
-      const skuRaw = $('meta[itemprop="sku"]').attr("content")?.trim();
-      if (skuRaw) ean = skuRaw.replace(/^0+/, "").split("-")[0];
+      let price = Number($('meta[itemprop="price"]').attr("content")?.trim() || NaN);
+      let ean = $('meta[itemprop="sku"]').attr("content")?.trim()?.replace(/^0+/, "").split("-")[0] || "";
 
       if (!ean || !name || !Number.isFinite(price)) {
-        const parsed = this.parseJsonLd(html, ean, name, price);
-        ean = parsed.ean;
-        name = parsed.name;
-        price = parsed.price;
+        const parsed = this.parseJsonLd(html);
+        ean = parsed.ean || ean; name = parsed.name || name; price = parsed.price || price;
       }
-
-      if (!ean || !name || !Number.isFinite(price)) return { isBlocked: true };
-
       return { isAvailable: true, ean, name, price, url };
-    } catch (error) {
-      this.logger.error(`Erro ${originalUrl}:`, (error as Error).message);
-      return { isBlocked: true };
-    }
+    } catch { return { isBlocked: true }; }
   }
 
   async run() {
-    this.logger.log("Iniciando atualização Tenda Atacado...");
-
+    this.logger.log("Iniciando Tenda...");
     const products = await this.prisma.marketProduct.findMany({
       where: { url: { not: null }, market: { slug: "TENDA_ATACADO" } },
-      select: { id: true, url: true, nameInMarket: true },
+      select: { id: true, url: true },
     });
 
     for (const product of products) {
-      if (!product.url) continue;
-
-      const scrapedData = await this.scrapeSingleProduct(product.url);
-
-      try {
-        await this.prisma.$transaction(async tx => {
-          if (scrapedData?.isBlocked) {
-            this.logger.warn(`Bloqueio no produto ${product.id}. Pulando.`);
-            return;
-          }
-
-          if (scrapedData?.isAvailable === true) {
-            await tx.marketProduct.update({
-              where: { id: product.id },
-              data: {
-                nameInMarket: scrapedData.name,
-                isAvailable: true,
-                lastScrapedAt: new Date(),
-              },
-            });
-
-            await tx.priceHistory.create({
-              data: {
-                price: scrapedData.price!,
-                timestamp: new Date(),
-                marketProductId: product.id,
-              },
-            });
-
-            this.logger.log(`ID: ${product.id} atualizado: R$ ${scrapedData.price}`);
-          } else {
-            await tx.marketProduct.update({
-              where: { id: product.id },
-              data: { isAvailable: false, lastScrapedAt: new Date() },
-            });
-            this.logger.warn(`Produto ${product.id} indisponível (404).`);
-          }
-        });
-      } catch (error) {
-        this.logger.error(`Erro BD ${product.id}:`, error);
-      }
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const data = await this.scrapeSingleProduct(product.url!);
+      await this.updateDatabase(product, data, "TENDA_ATACADO");
+      await new Promise(r => setTimeout(r, 500));
     }
-    this.logger.log("Atualização finalizada!");
   }
 }
