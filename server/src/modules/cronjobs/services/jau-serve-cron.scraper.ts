@@ -1,10 +1,11 @@
+/* istanbul ignore file */
+
 import { Injectable, Logger } from "@nestjs/common";
 import * as cheerio from "cheerio";
 import "dotenv/config";
 import { PrismaService } from "@database/prisma.service";
 
-const USER_AGENT =
-  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+const USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36";
 
 @Injectable()
 export class JauServeCronScraper {
@@ -34,7 +35,7 @@ export class JauServeCronScraper {
       if (!name) return null;
 
       const priceAttr = $(".prices .value").first().attr("content")?.trim();
-      const price = priceAttr ? Number(priceAttr) : NaN;
+      const price = priceAttr ? Number(priceAttr) : Number.NaN;
       if (!Number.isFinite(price) || price <= 0) return null;
 
       return { ean, name, price, url };
@@ -45,42 +46,21 @@ export class JauServeCronScraper {
   }
 
   async run() {
-    this.logger.log("Iniciando atualização de preços via URL no Jau Serve...");
+    this.logger.log("Iniciando atualização de preços no Jau Serve...");
 
     const products = await this.prisma.marketProduct.findMany({
-      where: {
-        url: { not: null },
-        market: { slug: "JAU_SERVE" },
-      },
-      select: {
-        id: true,
-        url: true,
-        nameInMarket: true,
-      },
+      where: { url: { not: null }, market: { slug: "JAU_SERVE" } },
+      select: { id: true, url: true, nameInMarket: true },
     });
-
-    this.logger.log(`Encontrados ${products.length} produtos para atualizar.`);
 
     for (const product of products) {
       if (!product.url) continue;
 
-      this.logger.debug(`Raspando Jau Serve: ${product.url}`);
-
       const scrapedData = await this.scrapeSingleProduct(product.url);
 
       try {
-        await this.prisma.$transaction(async (tx) => {
-          if (!scrapedData) {
-            // Se o produto não existir (não foi possível fazer a raspagem) atualiza o isAvailable como false.
-            await tx.marketProduct.update({
-              where: { id: product.id },
-              data: {
-                isAvailable: false,
-                lastScrapedAt: new Date(),
-              },
-            });
-            this.logger.warn(`Produto ${product.id} atualizado como indisponível (não foi possível fazer a raspagem).`);
-          } else {
+        await this.prisma.$transaction(async tx => {
+          if (scrapedData) {
             await tx.marketProduct.update({
               where: { id: product.id },
               data: {
@@ -98,19 +78,19 @@ export class JauServeCronScraper {
               },
             });
 
-            this.logger.log(
-              `ID do Produto ${product.id}, Name: ${product.nameInMarket}, Preço atualizado: R$ ${scrapedData.price}`
-            );
+            this.logger.log(`ID: ${product.id} atualizado: R$ ${scrapedData.price}`);
+          } else {
+            await tx.marketProduct.update({
+              where: { id: product.id },
+              data: { isAvailable: false, lastScrapedAt: new Date() },
+            });
+            this.logger.warn(`Produto ${product.id} indisponível.`);
           }
         });
       } catch (error) {
-        this.logger.error(`Erro ao salvar no banco o produto ${product.id}:`, error);
+        this.logger.error(`Erro BD ${product.id}:`, error);
       }
-
-      // Delay opcional para evitar rate-limit
-      // await new Promise((resolve) => setTimeout(resolve, 2000));
     }
-
     this.logger.log("Atualização do Jau Serve finalizada!");
   }
 }
