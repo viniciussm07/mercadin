@@ -49,7 +49,7 @@ jobs:
 
       - name: Semantic Release
         id: semantic
-        uses: cycjimmy/semantic-release-action@0a51e81134e9a17a45f6a12740c1e4c2b4e67fef # v4.2.1
+        uses: cycjimmy/semantic-release-action@16ca923e6ccbb50770c415a0ccd43709a8c5f7a4 # v4.2.2
         with:
           extra_plugins: |
             @semantic-release/changelog
@@ -68,7 +68,7 @@ jobs:
 
     steps:
       - name: Deploy to EC2
-        uses: appleboy/ssh-action@2ead5e36573dc217ba78e7e4ede5ee4a0e5ab5f2 # v1.2.2
+        uses: appleboy/ssh-action@2ead5e36573f08b82fbfce1504f1a4b05a647c6f # v1.2.2
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ubuntu
