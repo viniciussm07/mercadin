@@ -29,10 +29,7 @@
 name: SonarCloud analysis
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  # Análise automática roda no workflow CI (job ci-sonarcloud).
   workflow_dispatch:
 
 permissions:
