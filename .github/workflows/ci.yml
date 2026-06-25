@@ -7,9 +7,6 @@ on:
     branches: ["main"]
   workflow_dispatch:
 
-permissions:
-  contents: read
-
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
@@ -72,6 +69,8 @@ jobs:
     name: ci-eslint
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout repository
@@ -99,6 +98,8 @@ jobs:
     name: ci-typecheck
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout repository
@@ -129,6 +130,8 @@ jobs:
     name: ci-build
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout repository
@@ -154,3 +157,41 @@ jobs:
 
       - name: Build applications
         run: pnpm build
+
+  ci-sonarcloud:
+    name: ci-sonarcloud
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+
+      - name: Analyze with SonarCloud
+        uses: SonarSource/sonarcloud-github-action@4006f663ecaf1f8093e8e4abb9227f6041f52216
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=viniciussm07_mercadin
+            -Dsonar.organization=ssc0535-mercadin
+
+  ci-success:
+    name: ci-success
+    runs-on: ubuntu-latest
+    permissions: {}
+    needs:
+      - ci-server-tests
+      - ci-eslint
+      - ci-typecheck
+      - ci-build
+      - ci-sonarcloud
+    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') }}
+    steps:
+      - name: All CI checks passed
+        run: echo "All CI checks passed"
