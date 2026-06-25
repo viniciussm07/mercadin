@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/viniciussm07/mercadin/compare/v1.0.1...v1.0.2) (2026-06-25)
+
+
+### Bug Fixes
+
+* update CI workflows to include SonarCloud analysis and adjust deployment triggers (version 1) ([#30](https://github.com/viniciussm07/mercadin/issues/30)) ([5c83b3f](https://github.com/viniciussm07/mercadin/commit/5c83b3faab43fdc2521eaf44ce86502cd54d46a0))
+
 ## [1.0.1](https://github.com/viniciussm07/mercadin/compare/v1.0.0...v1.0.1) (2026-06-22)
 
 
