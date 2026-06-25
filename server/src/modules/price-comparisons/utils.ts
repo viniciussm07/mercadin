@@ -90,8 +90,9 @@ export const buildSuperCart = (items: AggregatedItem[]): SuperCart => {
       continue;
     }
 
-    const cheapest = item.variants.reduce((best, variant) =>
-      variant.price < best.price ? variant : best,
+    const cheapest = item.variants.reduce(
+      (best, variant) => (variant.price < best.price ? variant : best),
+      item.variants[0],
     );
     const subtotal = toMoney(cheapest.price * item.quantity);
     total += subtotal;
