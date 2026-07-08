@@ -3,7 +3,7 @@ set -euo pipefail
 exec > /var/log/mercadin-setup.log 2>&1
 
 # ------------------------------------------------------------------
-# 1. Swap (avoid OOM on t2.micro)
+# 1. Swap (avoid OOM on t3.micro)
 # ------------------------------------------------------------------
 fallocate -l 2G /swapfile
 chmod 600 /swapfile
