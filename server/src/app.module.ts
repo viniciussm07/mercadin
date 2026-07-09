@@ -11,7 +11,7 @@ import { ProductsModule } from "./modules/products/products.module";
 import { ShoppingListsModule } from "./modules/shopping-lists/shopping-lists.module";
 import { PriceComparisonsModule } from "./modules/price-comparisons/price-comparisons.module";
 import { PromotionsModule } from "./modules/promotions/promotions.module";
-
+import { CronjobsModule } from "@modules/cronjobs/cronjobs.module";
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -24,6 +24,7 @@ import { PromotionsModule } from "./modules/promotions/promotions.module";
     ShoppingListsModule,
     PriceComparisonsModule,
     PromotionsModule,
+    CronjobsModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: JwtAuthGuard }],
 })
